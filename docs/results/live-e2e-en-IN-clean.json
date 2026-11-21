@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-21T23:33:21.759Z",
+  "at": "2026-11-21T23:46:57.456Z",
   "url": "wss://voice-khata-gray.vercel.app/api/ws",
   "results": [
     {
@@ -10,11 +10,11 @@
         "add Pinky 500 credit 2026-11-22"
       ],
       "reply": "Added ₹500 udhaar for Pinky. Total due ₹620.",
-      "clientFirstAudioMs": 896,
-      "serverFirstAudioMs": 807,
-      "sttMs": 103,
-      "parseMs": 517,
-      "ttsMs": 186
+      "clientFirstAudioMs": 771,
+      "serverFirstAudioMs": 691,
+      "sttMs": 261,
+      "parseMs": 271,
+      "ttsMs": 158
     },
     {
       "file": "en-2.wav",
@@ -24,11 +24,11 @@
         "add Anil 250 payment 2026-11-22"
       ],
       "reply": "Received ₹250 from Anil. Total due ₹150.",
-      "clientFirstAudioMs": 1034,
-      "serverFirstAudioMs": 970,
-      "sttMs": 279,
-      "parseMs": 532,
-      "ttsMs": 158
+      "clientFirstAudioMs": 952,
+      "serverFirstAudioMs": 868,
+      "sttMs": 303,
+      "parseMs": 404,
+      "ttsMs": 159
     },
     {
       "file": "en-3.wav",
@@ -38,11 +38,11 @@
         "update {\"amount\":300}"
       ],
       "reply": "Fixed. Anil, ₹300 received. Total due ₹100.",
-      "clientFirstAudioMs": 806,
-      "serverFirstAudioMs": 743,
-      "sttMs": 214,
-      "parseMs": 425,
-      "ttsMs": 104
+      "clientFirstAudioMs": 848,
+      "serverFirstAudioMs": 750,
+      "sttMs": 135,
+      "parseMs": 464,
+      "ttsMs": 150
     },
     {
       "file": "en-4.wav",
@@ -50,11 +50,11 @@
       "heard": "What is Sita's total?",
       "ops": [],
       "reply": "Sita owes ₹300.",
-      "clientFirstAudioMs": 831,
-      "serverFirstAudioMs": 690,
-      "sttMs": 115,
-      "parseMs": 470,
-      "ttsMs": 104
+      "clientFirstAudioMs": 1055,
+      "serverFirstAudioMs": 949,
+      "sttMs": 215,
+      "parseMs": 526,
+      "ttsMs": 208
     },
     {
       "file": "en-5.wav",
@@ -62,11 +62,11 @@
       "heard": "How much credit went out today?",
       "ops": [],
       "reply": "Today ₹2,470 udhaar given, 7 entries.",
-      "clientFirstAudioMs": 640,
-      "serverFirstAudioMs": 533,
-      "sttMs": 185,
-      "parseMs": 148,
-      "ttsMs": 200
+      "clientFirstAudioMs": 767,
+      "serverFirstAudioMs": 710,
+      "sttMs": 198,
+      "parseMs": 346,
+      "ttsMs": 166
     }
   ]
 }

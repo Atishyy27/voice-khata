@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-21T23:31:40.528Z",
+  "at": "2026-11-21T23:46:14.399Z",
   "url": "wss://voice-khata-gray.vercel.app/api/ws",
   "results": [
     {
@@ -8,11 +8,11 @@
       "heard": "रमेश का 340 उधार लिखो।",
       "ops": [],
       "reply": "कौन से Ramesh? Ramesh Sharma या Ramesh Doodhwala?",
-      "clientFirstAudioMs": 1210,
-      "serverFirstAudioMs": 1111,
-      "sttMs": 278,
-      "parseMs": 533,
-      "ttsMs": 265
+      "clientFirstAudioMs": 842,
+      "serverFirstAudioMs": 780,
+      "sttMs": 282,
+      "parseMs": 288,
+      "ttsMs": 178
     },
     {
       "file": "e2e-sharma.wav",
@@ -22,11 +22,11 @@
         "add Ramesh Sharma 340 credit 2026-11-22"
       ],
       "reply": "Ramesh Sharma का ₹340 उधार लिखा। कुल बाकी ₹540।",
-      "clientFirstAudioMs": 535,
-      "serverFirstAudioMs": 471,
-      "sttMs": 147,
-      "parseMs": 205,
-      "ttsMs": 117
+      "clientFirstAudioMs": 662,
+      "serverFirstAudioMs": 606,
+      "sttMs": 103,
+      "parseMs": 233,
+      "ttsMs": 269
     },
     {
       "file": "line-6.wav",
@@ -36,11 +36,11 @@
         "update {\"amount\":430}"
       ],
       "reply": "ठीक किया। Ramesh Sharma का ₹430 उधार। कुल बाकी ₹630।",
-      "clientFirstAudioMs": 486,
-      "serverFirstAudioMs": 395,
-      "sttMs": 120,
-      "parseMs": 178,
-      "ttsMs": 96
+      "clientFirstAudioMs": 924,
+      "serverFirstAudioMs": 850,
+      "sttMs": 141,
+      "parseMs": 480,
+      "ttsMs": 227
     },
     {
       "file": "line-3.wav",
@@ -50,11 +50,11 @@
         "add Sita 1250 credit 2026-11-22"
       ],
       "reply": "Sita का ₹1,250 उधार लिखा। कुल बाकी ₹1,550।",
-      "clientFirstAudioMs": 656,
-      "serverFirstAudioMs": 528,
-      "sttMs": 222,
-      "parseMs": 203,
-      "ttsMs": 102
+      "clientFirstAudioMs": 671,
+      "serverFirstAudioMs": 629,
+      "sttMs": 154,
+      "parseMs": 215,
+      "ttsMs": 259
     },
     {
       "file": "line-4.wav",
@@ -64,11 +64,11 @@
         "add Mohan 500 payment 2026-11-22"
       ],
       "reply": "Mohan से ₹500 जमा। कुल बाकी ₹300।",
-      "clientFirstAudioMs": 606,
-      "serverFirstAudioMs": 520,
-      "sttMs": 202,
-      "parseMs": 171,
-      "ttsMs": 146
+      "clientFirstAudioMs": 565,
+      "serverFirstAudioMs": 517,
+      "sttMs": 230,
+      "parseMs": 190,
+      "ttsMs": 95
     },
     {
       "file": "e2e-total.wav",
@@ -76,11 +76,11 @@
       "heard": "रमेश शर्मा का total कितना है?",
       "ops": [],
       "reply": "Ramesh Sharma का कुल बाकी ₹630।",
-      "clientFirstAudioMs": 668,
-      "serverFirstAudioMs": 604,
-      "sttMs": 232,
-      "parseMs": 165,
-      "ttsMs": 207
+      "clientFirstAudioMs": 628,
+      "serverFirstAudioMs": 588,
+      "sttMs": 95,
+      "parseMs": 392,
+      "ttsMs": 100
     },
     {
       "file": "e2e-today.wav",
@@ -88,11 +88,11 @@
       "heard": "आज कितना उधार गया?",
       "ops": [],
       "reply": "आज ₹3,650 उधार गया, 8 एंट्री।",
-      "clientFirstAudioMs": 737,
-      "serverFirstAudioMs": 680,
-      "sttMs": 124,
-      "parseMs": 460,
-      "ttsMs": 95
+      "clientFirstAudioMs": 451,
+      "serverFirstAudioMs": 405,
+      "sttMs": 170,
+      "parseMs": 141,
+      "ttsMs": 94
     },
     {
       "file": "line-8.wav",
@@ -102,11 +102,11 @@
         "add Pinky 2000 credit 2026-11-22"
       ],
       "reply": "Pinky का ₹2,000 उधार लिखा। कुल बाकी ₹2,120।",
-      "clientFirstAudioMs": 631,
-      "serverFirstAudioMs": 549,
-      "sttMs": 144,
-      "parseMs": 199,
-      "ttsMs": 205
+      "clientFirstAudioMs": 649,
+      "serverFirstAudioMs": 576,
+      "sttMs": 218,
+      "parseMs": 195,
+      "ttsMs": 162
     },
     {
       "file": "e2e-two.wav",
@@ -117,11 +117,11 @@
         "add Anil 200 payment 2026-11-21"
       ],
       "reply": "Anil का ₹500 उधार लिखा। Anil से ₹200 जमा। कुल बाकी ₹700।",
-      "clientFirstAudioMs": 975,
-      "serverFirstAudioMs": 930,
-      "sttMs": 233,
-      "parseMs": 594,
-      "ttsMs": 102
+      "clientFirstAudioMs": 1087,
+      "serverFirstAudioMs": 983,
+      "sttMs": 247,
+      "parseMs": 571,
+      "ttsMs": 164
     }
   ]
 }

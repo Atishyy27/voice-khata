@@ -2,7 +2,7 @@
 
 A khata (credit ledger) a kirana shopkeeper talks to across the counter. Hold one button, say
 "Ramesh ka 340 udhaar, kal 200 diya tha", let go, and the phone answers in your language (median first audio
-about 0.7 s in our tests, not yet measured on a phone) and updates the khata. No typing. Built for BolBharat (Gnani x HackBriven), track PS2.
+0.66 to 1.04 s across our Hindi, English and Kannada runs; not yet measured on a phone) and updates the khata. No typing. Built for BolBharat (Gnani x HackBriven), track PS2.
 
 **Live:** https://voice-khata-gray.vercel.app (built for Chrome on a low-end Android phone; on a laptop, hold the
 space bar)
@@ -41,7 +41,7 @@ flowchart LR
 1. While the button is held, an AudioWorklet turns the mic into 16 kHz 16-bit frames of exactly 1,024 bytes
    and streams them to our server, which relays them to Prisma.
 2. On release the server sends Prisma a `commit` at once instead of waiting for silence, then waits for Prisma's
-   final transcript (up to 2.5 s; in our runs it came in 120 to 510 ms). That is the endpointing.
+   final transcript (up to 2.5 s; in the live runs it came in 95 to 425 ms). That is the endpointing.
 3. The transcript and the customer list go to an LLM that returns one JSON intent: add entries, correct the
    last one, ask a total, ask today's total, or answer "which Ramesh".
 4. Our own code (`api/_lib/ledger.ts`) does every sum and balance. The LLM only extracts the amount it heard;
@@ -67,17 +67,17 @@ starts on the same socket, so we count audio only after that request's own `star
 
 ## Measured results
 
-All test audio is synthetic: shop lines spoken by Timbre voices, never real customer recordings. "Chatter"
+All runs hit the live deployment. All test audio is synthetic: shop lines spoken by Timbre voices, never real customer recordings. "Chatter"
 mixes a second voice saying another line underneath at 40% volume. First audio = button release to the first
 byte of reply audio reaching the client, measured from a home laptop on Wi-Fi. The on-screen badge adds
 the 150 ms the page keeps listening after release.
 
 | Run | Turns correct | First audio p50 | p90 | File |
 |---|---|---|---|---|
-| Live, Hindi and code-mix (which-Ramesh question, correction, totals, two entries in one sentence) | 9/9 | 656 ms | 1,210 ms | `docs/results/live-e2e-hi-IN-clean.json` |
-| Live, Kannada | 4/4 | 919 ms | 952 ms | `docs/results/live-e2e-kn-IN-clean.json` |
-| Live, English | 5/5 | 831 ms | 1,034 ms | `docs/results/live-e2e-en-IN-clean.json` |
-| Local server, Hindi with chatter | 9/9 | 1,049 ms | 1,572 ms | `docs/results/local-e2e-hi-IN-noise.json` |
+| Hindi and code-mix (which-Ramesh question, correction, totals, two entries in one sentence) | 9/9 | 662 ms | 1,087 ms | `docs/results/live-e2e-hi-IN-clean.json` |
+| Same 9 turns with chatter | 9/9 | 864 ms | 1,045 ms | `docs/results/live-e2e-hi-IN-noise.json` |
+| Kannada | 4/4 | 1,041 ms | 1,221 ms | `docs/results/live-e2e-kn-IN-clean.json` |
+| English | 5/5 | 848 ms | 1,055 ms | `docs/results/live-e2e-en-IN-clean.json` |
 
 A turn counts as correct when the amount, the credit or payment direction and the customer all match, or the
 reply carries the expected names or ₹ total and changes nothing. The committed records came from these runs;
