@@ -1,0 +1,256 @@
+import { randomUUID } from "node:crypto";
+import WebSocket from "ws";
+import { applyIntent, customers } from "./ledger";
+import { extractAmounts } from "./numbers";
+import { parseUtterance } from "./parse";
+import { greeting, say } from "./replies";
+import { SttStream } from "./stt";
+import { TtsSocket } from "./tts";
+import type { Entry, Intent, SessionState } from "./types";
+
+const LANGS = ["hi-IN", "en-IN", "kn-IN", "ta-IN", "te-IN", "ml-IN", "mr-IN", "bn-IN", "gu-IN", "pa-IN"];
+const FRAME_BYTES = 1024;
+const MAX_HOLD_MS = 20_000;
+const MAX_TURNS = 150;
+const NOT_HEARD: Record<string, string> = {
+  "hi-IN": "सुनाई नहीं दिया, बटन दबाकर फिर से बोलिए।",
+  "en-IN": "I did not catch that. Hold the button and say it again.",
+};
+
+const istToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
+
+// The first spoken turn must say it is an AI: the greeting's sentences up to the one that says so.
+export function disclosure(lang: string): string {
+  const out: string[] = [];
+  for (const part of greeting(lang).split(/(?<=[।.!?])\s+/)) {
+    out.push(part);
+    if (part.includes("AI")) break;
+  }
+  return out.join(" ");
+}
+
+// If the transcript holds exactly one amount and the LLM wrote a different one, the transcript wins.
+export function crossCheck(intent: Intent, text: string): Intent {
+  const heard = extractAmounts(text);
+  if (heard.length !== 1) return intent;
+  const a = heard[0];
+  if (intent.kind === "add" && intent.entries?.length === 1 && intent.entries[0].amount !== a) {
+    return { ...intent, entries: [{ ...intent.entries[0], amount: a }] };
+  }
+  if (intent.kind === "correct" && intent.fix?.amount && intent.fix.amount !== a) {
+    return { ...intent, fix: { ...intent.fix, amount: a } };
+  }
+  return intent;
+}
+
+function validEntries(raw: unknown): Entry[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(
+      (e: any) =>
+        e && typeof e.id === "string" && typeof e.name === "string" && typeof e.nameKey === "string" &&
+        Number.isInteger(e.amount) && e.amount > 0 && e.amount <= 10_000_000 &&
+        (e.direction === "credit" || e.direction === "payment") &&
+        /^\d{4}-\d{2}-\d{2}$/.test(e.date) && typeof e.at === "string",
+    )
+    .slice(0, 5000) as Entry[];
+}
+
+export class Session {
+  private state: SessionState = { entries: [], lastIds: [] };
+  private lang = "hi-IN";
+  private greeted = false;
+  private stt: SttStream | null = null;
+  private tts: TtsSocket;
+  private key: string;
+  private holding = false;
+  private segments: string[] = [];
+  private speechOpen = false;
+  private onFinal: (() => void) | null = null;
+  private turn = 0;
+  private turns = 0;
+  private releasedAt = 0;
+  private sttLang: string | undefined;
+  private holdTimer: NodeJS.Timeout | undefined;
+  private closed = false;
+
+  constructor(private ws: WebSocket) {
+    this.key = process.env.GNANI_API_KEY ?? "";
+    this.tts = new TtsSocket(this.key);
+    ws.on("message", (data, isBinary) => {
+      if (isBinary) this.onAudio(data as Buffer);
+      else this.onText(data.toString()).catch((e) => this.fail(e));
+    });
+    ws.on("close", () => this.dispose());
+    ws.on("error", () => this.dispose());
+    if (!this.key || !process.env.GROQ_API_KEY) this.fail(new Error("server keys missing"));
+  }
+
+  private send(obj: object) {
+    if (!this.closed && this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify(obj));
+  }
+
+  private fail(e: unknown) {
+    console.error(JSON.stringify({ ev: "error", message: e instanceof Error ? e.message : String(e) }));
+    this.send({ t: "error", message: "सर्वर में दिक्कत आई, फिर से कोशिश करें।" });
+  }
+
+  private async onText(raw: string) {
+    let m: any;
+    try {
+      m = JSON.parse(raw);
+    } catch {
+      return;
+    }
+    if (m.t === "hello") return this.hello(m);
+    if (!this.stt) return;
+    if (m.t === "press") return this.press();
+    if (m.t === "release") return this.release();
+    if (m.t === "greet") return this.greet();
+  }
+
+  private async hello(m: any) {
+    this.lang = LANGS.includes(m.lang) ? m.lang : "hi-IN";
+    this.greeted = m.greeted === true;
+    this.state = { entries: validEntries(m.entries), lastIds: [] };
+    this.stt?.close();
+    this.stt = this.makeStt();
+    await Promise.all([this.stt.open(), this.tts.warm()]);
+    this.send({ t: "ready" });
+  }
+
+  private makeStt() {
+    const names = customers(this.state.entries).map((c) => c.name);
+    return new SttStream(this.key, this.lang, names, {
+      onSpeechStart: () => {
+        this.speechOpen = true;
+      },
+      onTranscript: (text, lang) => {
+        this.speechOpen = false;
+        if (text.trim()) this.segments.push(text.trim());
+        if (lang) this.sttLang = lang;
+        const done = this.onFinal;
+        this.onFinal = null;
+        done?.();
+      },
+      onError: (message) => console.error(JSON.stringify({ ev: "stt_error", message })),
+      onClose: () => {
+        this.speechOpen = false;
+        const done = this.onFinal;
+        this.onFinal = null;
+        done?.();
+      },
+    });
+  }
+
+  private press() {
+    if (this.turns >= MAX_TURNS) {
+      this.send({ t: "error", message: "इस सत्र की सीमा पूरी हुई। पेज दोबारा खोलें।" });
+      return;
+    }
+    this.turn++;
+    this.tts.cancel();
+    this.tts.warm().catch(() => {});
+    if (this.stt && !this.stt.isOpen) this.stt.open().catch(() => {});
+    this.segments = [];
+    this.speechOpen = false;
+    this.holding = true;
+    clearTimeout(this.holdTimer);
+    this.holdTimer = setTimeout(() => this.release(), MAX_HOLD_MS);
+  }
+
+  private onAudio(frame: Buffer) {
+    if (this.holding && frame.length === FRAME_BYTES) this.stt?.send(frame);
+  }
+
+  private waitForFinal(ms: number) {
+    return new Promise<void>((resolve) => {
+      const t = setTimeout(() => {
+        this.onFinal = null;
+        resolve();
+      }, ms);
+      this.onFinal = () => {
+        clearTimeout(t);
+        resolve();
+      };
+    });
+  }
+
+  private async release() {
+    if (!this.holding) return;
+    this.holding = false;
+    clearTimeout(this.holdTimer);
+    this.turns++;
+    const turn = this.turn;
+    this.releasedAt = Date.now();
+    this.stt?.commit();
+    if (this.speechOpen) await this.waitForFinal(2500);
+    else if (!this.segments.length) await this.waitForFinal(900);
+    if (turn !== this.turn || this.closed) return;
+
+    const text = this.segments.join(" ").trim();
+    const sttMs = Date.now() - this.releasedAt;
+    if (!text) {
+      this.send({ t: "error", message: NOT_HEARD[this.lang] ?? NOT_HEARD["hi-IN"] });
+      return;
+    }
+    this.send({ t: "heard", text, lang: this.sttLang, sttMs });
+
+    const parseStart = Date.now();
+    const parsed = await parseUtterance(text, { customers: customers(this.state.entries), pending: this.state.pending });
+    if (turn !== this.turn || this.closed) return;
+    const intent = crossCheck(parsed.intent, text);
+    const parseMs = Date.now() - parseStart;
+
+    const result = applyIntent(this.state, intent, { today: istToday(), now: new Date().toISOString(), newId: () => randomUUID() });
+    this.state = result.state;
+    if (result.ops.length) this.send({ t: "ops", ops: result.ops });
+
+    let reply = say(result.reply, this.lang);
+    if (!this.greeted) reply = `${disclosure(this.lang)} ${reply}`;
+    this.greeted = true;
+    console.log(JSON.stringify({ ev: "turn", kind: intent.kind, reply: result.reply.key, sttMs, parseMs, model: parsed.model }));
+    await this.speak(turn, reply, { sttMs, parseMs });
+  }
+
+  private async greet() {
+    if (this.greeted) return;
+    this.greeted = true;
+    this.turn++;
+    this.releasedAt = Date.now();
+    await this.speak(this.turn, greeting(this.lang), {});
+  }
+
+  private async speak(turn: number, text: string, timing: { sttMs?: number; parseMs?: number }) {
+    this.send({ t: "say", turn, text });
+    const ttsStart = Date.now();
+    let first = 0;
+    try {
+      await this.tts.speak(text, this.lang, (pcm) => {
+        if (turn !== this.turn || this.closed) return;
+        if (!first) first = Date.now();
+        this.ws.send(pcm, { binary: true });
+      });
+    } catch (e) {
+      if (turn === this.turn) this.fail(e);
+      this.tts.cancel();
+      return;
+    }
+    if (turn !== this.turn) return;
+    this.send({
+      t: "said",
+      turn,
+      firstAudioMs: first ? first - this.releasedAt : null,
+      ttsMs: first ? first - ttsStart : null,
+      ...timing,
+    });
+  }
+
+  private dispose() {
+    if (this.closed) return;
+    this.closed = true;
+    clearTimeout(this.holdTimer);
+    this.stt?.close();
+    this.tts.close();
+  }
+}
