@@ -1,0 +1,4 @@
+{
+  "regions": ["bom1"],
+  "functions": { "api/ws.ts": { "maxDuration": 300 } }
+}

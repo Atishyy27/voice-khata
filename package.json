@@ -1,0 +1,24 @@
+{
+  "name": "voice-khata",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A voice khata for kirana stores on Gnani Prisma v3.0 and Timbre v3.0",
+  "scripts": {
+    "dev": "tsx scripts/dev.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "ws": "^8.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/ws": "^8.18.2",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}
