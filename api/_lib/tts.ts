@@ -17,6 +17,7 @@ export class TtsSocket {
     if (this.ready && this.ws && this.ws.readyState <= WebSocket.OPEN) return this.ready;
     const ws = new WebSocket("wss://api.vachana.ai/api/v1/tts", { headers: { "X-API-Key-ID": this.key } });
     this.ws = ws;
+    ws.on("error", () => {}); // errors also close the socket; a listener stops Node treating them as fatal
     this.ready = new Promise((resolve, reject) => {
       ws.once("open", () => resolve(ws));
       ws.once("error", reject);
@@ -41,7 +42,7 @@ export class TtsSocket {
         ws.off("close", onClose);
         err ? reject(err) : resolve();
       };
-      const onClose = () => finish();
+      const onClose = () => finish(new Error("voice socket closed"));
       const onMessage = (raw: WebSocket.RawData) => {
         let m: any;
         try {

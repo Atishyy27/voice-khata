@@ -6,7 +6,7 @@ const LANGS = [
   ["ml-IN", "മലയാളം"], ["mr-IN", "मराठी"], ["bn-IN", "বাংলা"], ["gu-IN", "ગુજરાતી"], ["pa-IN", "ਪੰਜਾਬੀ"],
 ];
 const LANG_KEY = "vk-lang";
-const GREETED_KEY = "vk-greeted";
+const greetedKey = () => "vk-greeted-" + lang; // per language: the AI disclosure is owed again in a new language
 const TAIL_MS = 150; // keep sending briefly after release so the last syllable is not cut
 const $ = (id) => document.getElementById(id);
 const rupee = new Intl.NumberFormat("en-IN");
@@ -62,7 +62,7 @@ function connect() {
     readyTimer = setTimeout(
       () => setStatus("सर्वर से जवाब नहीं आया। नेटवर्क जाँचें, फिर पेज दोबारा खोलें।", "err"), 8000);
     const entries = await allEntries();
-    if (sock === ws && sock.readyState === WebSocket.OPEN) sock.send(JSON.stringify({ t: "hello", lang, entries, greeted: sessionStorage.getItem(GREETED_KEY) === "1" }));
+    if (sock === ws && sock.readyState === WebSocket.OPEN) sock.send(JSON.stringify({ t: "hello", lang, entries, greeted: sessionStorage.getItem(greetedKey()) === "1" }));
   };
   sock.onmessage = (ev) => { if (sock === ws) onMessage(ev); };
   sock.onclose = () => {
@@ -93,7 +93,7 @@ function onMessage(ev) {
       ready = true;
       retryMs = 500;
       if (!talking) setIdle();
-      if (ctx && sessionStorage.getItem(GREETED_KEY) !== "1") send({ t: "greet" });
+      if (ctx && sessionStorage.getItem(greetedKey()) !== "1") send({ t: "greet" });
       break;
     case "heard":
       $("heard").textContent = m.text || "-";
@@ -104,12 +104,12 @@ function onMessage(ev) {
       break;
     case "say":
       accepting = true;
-      sessionStorage.setItem(GREETED_KEY, "1");
       clearTimeout(idleTimer);
       $("reply").textContent = m.text || "-";
       if (!talking) setStatus("बोल रहा हूँ", "speak");
       break;
     case "said":
+      sessionStorage.setItem(greetedKey(), "1");
       if (m.firstAudioMs != null) $("badge").textContent = ((m.firstAudioMs + TAIL_MS) / 1000).toFixed(2) + " s";
       if (player && ctx) {
         const wait = Math.max(0, player.endsAt() - ctx.currentTime) * 1000 + 150;

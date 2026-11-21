@@ -214,7 +214,8 @@ export function applyIntent(state: SessionState, intent: Intent, ctx: Ctx): Turn
     case "clarify_answer": {
       const pending = state.pending;
       if (!pending) return help(state);
-      const pick = pickCandidate(pending.candidates, intent.name || intent.nameKey || "");
+      const pick =
+        pickCandidate(pending.candidates, intent.nameKey || "") ?? pickCandidate(pending.candidates, intent.name || "");
       if (!pick) return help(state);
       const cleared = withState(state, { pending: undefined });
       const p = pending.intent;

@@ -12,10 +12,6 @@ const LANGS = ["hi-IN", "en-IN", "kn-IN", "ta-IN", "te-IN", "ml-IN", "mr-IN", "b
 const FRAME_BYTES = 1024;
 const MAX_HOLD_MS = 20_000;
 const MAX_TURNS = 150;
-const NOT_HEARD: Record<string, string> = {
-  "hi-IN": "सुनाई नहीं दिया, बटन दबाकर फिर से बोलिए।",
-  "en-IN": "I did not catch that. Hold the button and say it again.",
-};
 
 const istToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
 
@@ -59,7 +55,8 @@ function validEntries(raw: unknown): Entry[] {
 export class Session {
   private state: SessionState = { entries: [], lastIds: [] };
   private lang = "hi-IN";
-  private greeted = false;
+  private greeted = false; // per language: the client sends its own per-language flag in hello
+  private greeting = false;
   private stt: SttStream | null = null;
   private tts: TtsSocket;
   private key: string;
@@ -191,7 +188,7 @@ export class Session {
     const text = this.segments.join(" ").trim();
     const sttMs = Date.now() - this.releasedAt;
     if (!text) {
-      this.send({ t: "error", message: NOT_HEARD[this.lang] ?? NOT_HEARD["hi-IN"] });
+      await this.reply(turn, say({ key: "help" }, this.lang), { sttMs });
       return;
     }
     this.send({ t: "heard", text, lang: this.sttLang, sttMs });
@@ -206,22 +203,28 @@ export class Session {
     this.state = result.state;
     if (result.ops.length) this.send({ t: "ops", ops: result.ops });
 
-    let reply = say(result.reply, this.lang);
-    if (!this.greeted) reply = `${disclosure(this.lang)} ${reply}`;
-    this.greeted = true;
     console.log(JSON.stringify({ ev: "turn", kind: intent.kind, reply: result.reply.key, sttMs, parseMs, model: parsed.model }));
-    await this.speak(turn, reply, { sttMs, parseMs });
+    await this.reply(turn, say(result.reply, this.lang), { sttMs, parseMs });
+  }
+
+  // The disclosure counts as given only once a turn carrying it has been spoken to the end.
+  private async reply(turn: number, text: string, timing: { sttMs?: number; parseMs?: number }) {
+    const disclose = !this.greeted;
+    const done = await this.speak(turn, disclose ? `${disclosure(this.lang)} ${text}` : text, timing);
+    if (done && disclose) this.greeted = true;
   }
 
   private async greet() {
-    if (this.greeted) return;
-    this.greeted = true;
+    if (this.greeted || this.greeting) return;
+    this.greeting = true;
     this.turn++;
     this.releasedAt = Date.now();
-    await this.speak(this.turn, greeting(this.lang), {});
+    const done = await this.speak(this.turn, greeting(this.lang), {});
+    this.greeting = false;
+    if (done) this.greeted = true;
   }
 
-  private async speak(turn: number, text: string, timing: { sttMs?: number; parseMs?: number }) {
+  private async speak(turn: number, text: string, timing: { sttMs?: number; parseMs?: number }): Promise<boolean> {
     this.send({ t: "say", turn, text });
     const ttsStart = Date.now();
     let first = 0;
@@ -232,11 +235,14 @@ export class Session {
         this.ws.send(pcm, { binary: true });
       });
     } catch (e) {
-      if (turn === this.turn) this.fail(e);
-      this.tts.cancel();
-      return;
+      // A barge-in already closed this socket and opened a fresh one; only a failure of the live turn resets it.
+      if (turn === this.turn) {
+        this.fail(e);
+        this.tts.cancel();
+      }
+      return false;
     }
-    if (turn !== this.turn) return;
+    if (turn !== this.turn || this.closed) return false;
     this.send({
       t: "said",
       turn,
@@ -244,6 +250,7 @@ export class Session {
       ttsMs: first ? first - ttsStart : null,
       ...timing,
     });
+    return true;
   }
 
   private dispose() {

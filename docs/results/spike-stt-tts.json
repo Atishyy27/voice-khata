@@ -1,0 +1,467 @@
+{
+  "at": "2026-11-21T23:21:50.725Z",
+  "rows": [
+    {
+      "id": 1,
+      "fmt": "transcribe",
+      "noise": "clean",
+      "expect": 340,
+      "text": "रमेश का 340 उधार लिखो।",
+      "lang": "hi-IN",
+      "serverMs": 283,
+      "commitToText": 507,
+      "handshake": 719
+    },
+    {
+      "id": 2,
+      "fmt": "transcribe",
+      "noise": "clean",
+      "expect": 200,
+      "text": "रमेश ने कल 200 रुपये दिए थे।",
+      "lang": "hi-IN",
+      "serverMs": 227,
+      "commitToText": 350,
+      "handshake": 306
+    },
+    {
+      "id": 3,
+      "fmt": "transcribe",
+      "noise": "clean",
+      "expect": 1250,
+      "text": "सीता का 1250 उधार।",
+      "lang": "hi-IN",
+      "serverMs": 277,
+      "commitToText": 358,
+      "handshake": 298
+    },
+    {
+      "id": 4,
+      "fmt": "transcribe",
+      "noise": "clean",
+      "expect": 500,
+      "text": "Mohan paid 500 rupees today.",
+      "lang": "en-IN",
+      "serverMs": 118,
+      "commitToText": 219,
+      "handshake": 276
+    },
+    {
+      "id": 5,
+      "fmt": "transcribe",
+      "noise": "clean",
+      "expect": 65,
+      "text": "सुरेश का 65 रुपये उधार।",
+      "lang": "hi-IN",
+      "serverMs": 161,
+      "commitToText": 212,
+      "handshake": 382
+    },
+    {
+      "id": 6,
+      "fmt": "transcribe",
+      "noise": "clean",
+      "expect": 430,
+      "text": "नहीं 430।",
+      "lang": "hi-IN",
+      "serverMs": 177,
+      "commitToText": 225,
+      "handshake": 269
+    },
+    {
+      "id": 7,
+      "fmt": "transcribe",
+      "noise": "clean",
+      "expect": 750,
+      "text": "अनिल ने परसों 750 दिए।",
+      "lang": "hi-IN",
+      "serverMs": 245,
+      "commitToText": 322,
+      "handshake": 360
+    },
+    {
+      "id": 8,
+      "fmt": "transcribe",
+      "noise": "clean",
+      "expect": 2000,
+      "text": "पिंकी का 2000 उधार।",
+      "lang": "hi-IN",
+      "serverMs": 210,
+      "commitToText": 341,
+      "handshake": 663
+    },
+    {
+      "id": 9,
+      "fmt": "transcribe",
+      "noise": "clean",
+      "expect": null,
+      "text": "रमेश का total कितना है?",
+      "lang": "hi-IN",
+      "serverMs": 104,
+      "commitToText": 187,
+      "handshake": 256
+    },
+    {
+      "id": 10,
+      "fmt": "transcribe",
+      "noise": "clean",
+      "expect": 340,
+      "text": "ರಮೇಶ್ ಅವರಿಗೆ 340 ರೂಪಾಯಿ ಸಾಲ.",
+      "lang": "kn-IN",
+      "serverMs": 265,
+      "commitToText": 339,
+      "handshake": 308
+    },
+    {
+      "id": 1,
+      "fmt": "codemix",
+      "noise": "clean",
+      "expect": 340,
+      "text": "रमेश का तीन सौ चालीस उधार लिखो।",
+      "lang": "hi-IN",
+      "serverMs": 377,
+      "commitToText": 424,
+      "handshake": 238
+    },
+    {
+      "id": 2,
+      "fmt": "codemix",
+      "noise": "clean",
+      "expect": 200,
+      "text": "रमेश ने कल दो सौ रुपये दिए थे।",
+      "lang": "hi-IN",
+      "serverMs": 275,
+      "commitToText": 389,
+      "handshake": 363
+    },
+    {
+      "id": 3,
+      "fmt": "codemix",
+      "noise": "clean",
+      "expect": 1250,
+      "text": "सीता का बारह सौ पचास उधार।",
+      "lang": "hi-IN",
+      "serverMs": 253,
+      "commitToText": 325,
+      "handshake": 308
+    },
+    {
+      "id": 4,
+      "fmt": "codemix",
+      "noise": "clean",
+      "expect": 500,
+      "text": "Mohan paid five hundred rupees today.",
+      "lang": "en-IN",
+      "serverMs": 292,
+      "commitToText": 350,
+      "handshake": 307
+    },
+    {
+      "id": 5,
+      "fmt": "codemix",
+      "noise": "clean",
+      "expect": 65,
+      "text": "सुरेश का पैंसठ रुपये उधार।",
+      "lang": "hi-IN",
+      "serverMs": 199,
+      "commitToText": 253,
+      "handshake": 248
+    },
+    {
+      "id": 6,
+      "fmt": "codemix",
+      "noise": "clean",
+      "expect": 430,
+      "text": "नहीं, चार सौ तीस।",
+      "lang": "hi-IN",
+      "serverMs": 195,
+      "commitToText": 264,
+      "handshake": 260
+    },
+    {
+      "id": 7,
+      "fmt": "codemix",
+      "noise": "clean",
+      "expect": 750,
+      "text": "अनिल ने परसों साढ़े सात सौ दिए।",
+      "lang": "hi-IN",
+      "serverMs": 214,
+      "commitToText": 284,
+      "handshake": 259
+    },
+    {
+      "id": 8,
+      "fmt": "codemix",
+      "noise": "clean",
+      "expect": 2000,
+      "text": "पिंकी का two thousand उधार।",
+      "lang": "hi-IN",
+      "serverMs": 134,
+      "commitToText": 234,
+      "handshake": 262
+    },
+    {
+      "id": 9,
+      "fmt": "codemix",
+      "noise": "clean",
+      "expect": null,
+      "text": "रमेश का total कितना है?",
+      "lang": "hi-IN",
+      "serverMs": 269,
+      "commitToText": 336,
+      "handshake": 328
+    },
+    {
+      "id": 10,
+      "fmt": "codemix",
+      "noise": "clean",
+      "expect": 340,
+      "text": "ರಮೇಶ್ ಅವರಿಗೆ ಮುನ್ನೂರ ನಲವತ್ತು ರೂಪಾಯಿ ಸಾಲ.",
+      "lang": "kn-IN",
+      "serverMs": 296,
+      "commitToText": 389,
+      "handshake": 245
+    },
+    {
+      "id": 1,
+      "fmt": "auto+transcribe",
+      "noise": "clean",
+      "expect": 340,
+      "text": "रमेश का 340 उधार लिखो।",
+      "lang": "hi-IN",
+      "serverMs": 350,
+      "commitToText": 416,
+      "handshake": 303
+    },
+    {
+      "id": 2,
+      "fmt": "auto+transcribe",
+      "noise": "clean",
+      "expect": 200,
+      "text": "रमेश ने कल 200 रुपये दिए थे।",
+      "lang": "hi-IN",
+      "serverMs": 175,
+      "commitToText": 246,
+      "handshake": 254
+    },
+    {
+      "id": 3,
+      "fmt": "auto+transcribe",
+      "noise": "clean",
+      "expect": 1250,
+      "text": "सीता का 1250 उधार।",
+      "lang": "hi-IN",
+      "serverMs": 149,
+      "commitToText": 213,
+      "handshake": 297
+    },
+    {
+      "id": 4,
+      "fmt": "auto+transcribe",
+      "noise": "clean",
+      "expect": 500,
+      "text": "Mohan paid 500 rupees today.",
+      "lang": "en-IN",
+      "serverMs": 95,
+      "commitToText": 147,
+      "handshake": 262
+    },
+    {
+      "id": 5,
+      "fmt": "auto+transcribe",
+      "noise": "clean",
+      "expect": 65,
+      "text": "सुरेश का 65 रुपये उधार।",
+      "lang": "hi-IN",
+      "serverMs": 285,
+      "commitToText": 332,
+      "handshake": 256
+    },
+    {
+      "id": 6,
+      "fmt": "auto+transcribe",
+      "noise": "clean",
+      "expect": 430,
+      "text": "नहीं, 430।",
+      "lang": "hi-IN",
+      "serverMs": 243,
+      "commitToText": 313,
+      "handshake": 308
+    },
+    {
+      "id": 7,
+      "fmt": "auto+transcribe",
+      "noise": "clean",
+      "expect": 750,
+      "text": "अनिल ने परसों 750 दिए।",
+      "lang": "hi-IN",
+      "serverMs": 392,
+      "commitToText": 489,
+      "handshake": 340
+    },
+    {
+      "id": 8,
+      "fmt": "auto+transcribe",
+      "noise": "clean",
+      "expect": 2000,
+      "text": "पिंकी का 2000 उधार।",
+      "lang": "hi-IN",
+      "serverMs": 133,
+      "commitToText": 187,
+      "handshake": 307
+    },
+    {
+      "id": 9,
+      "fmt": "auto+transcribe",
+      "noise": "clean",
+      "expect": null,
+      "text": "रमेश का total कितना है?",
+      "lang": "hi-IN",
+      "serverMs": 133,
+      "commitToText": 206,
+      "handshake": 357
+    },
+    {
+      "id": 10,
+      "fmt": "auto+transcribe",
+      "noise": "clean",
+      "expect": 340,
+      "text": "ರಮೇಶ್ ಅವರಿಗೆ 340 ರೂಪಾಯಿ ಸಾಲ.",
+      "lang": "kn-IN",
+      "serverMs": 316,
+      "commitToText": 378,
+      "handshake": 438
+    },
+    {
+      "id": 1,
+      "fmt": "transcribe",
+      "noise": "babble",
+      "expect": 340,
+      "text": "रमेश का 340 उधार।",
+      "lang": "hi-IN",
+      "serverMs": 359,
+      "commitToText": 411,
+      "handshake": 312
+    },
+    {
+      "id": 2,
+      "fmt": "transcribe",
+      "noise": "babble",
+      "expect": 200,
+      "text": "रमेश ने कल 200 रुपये दिए थे।",
+      "lang": "hi-IN",
+      "serverMs": 206,
+      "commitToText": 255,
+      "handshake": 230
+    },
+    {
+      "id": 3,
+      "fmt": "transcribe",
+      "noise": "babble",
+      "expect": 1250,
+      "text": "सीता का 1250 उधार।",
+      "lang": "hi-IN",
+      "serverMs": 340,
+      "commitToText": 451,
+      "handshake": 242
+    },
+    {
+      "id": 4,
+      "fmt": "transcribe",
+      "noise": "babble",
+      "expect": 500,
+      "text": "Mohan paid 500 rupees today.",
+      "lang": "en-IN",
+      "serverMs": 277,
+      "commitToText": 397,
+      "handshake": 309
+    },
+    {
+      "id": 5,
+      "fmt": "transcribe",
+      "noise": "babble",
+      "expect": 65,
+      "text": "सुरेश का 65 रुपए उधार नहीं।",
+      "lang": "hi-IN",
+      "serverMs": 314,
+      "commitToText": 397,
+      "handshake": 256
+    },
+    {
+      "id": 6,
+      "fmt": "transcribe",
+      "noise": "babble",
+      "expect": 430,
+      "text": "नहीं, 430।",
+      "lang": "hi-IN",
+      "serverMs": 160,
+      "commitToText": 246,
+      "handshake": 353
+    },
+    {
+      "id": 7,
+      "fmt": "transcribe",
+      "noise": "babble",
+      "expect": 750,
+      "text": "अनिल ने परसों 750 दिए।",
+      "lang": "hi-IN",
+      "serverMs": 152,
+      "commitToText": 196,
+      "handshake": 297
+    },
+    {
+      "id": 8,
+      "fmt": "transcribe",
+      "noise": "babble",
+      "expect": 2000,
+      "text": "2000",
+      "serverMs": 133,
+      "commitToText": 199,
+      "handshake": 271
+    },
+    {
+      "id": 9,
+      "fmt": "transcribe",
+      "noise": "babble",
+      "expect": null,
+      "text": "रमेश का total कितना है?",
+      "lang": "hi-IN",
+      "serverMs": 165,
+      "commitToText": 222,
+      "handshake": 261
+    },
+    {
+      "id": 10,
+      "fmt": "transcribe",
+      "noise": "babble",
+      "expect": 340,
+      "text": "ರಮೇಶ್ ಅವರಿಗೆ 340 ರೂಪಾಯಿ ಸಾಲ.",
+      "lang": "kn-IN",
+      "serverMs": 225,
+      "commitToText": 327,
+      "handshake": 397
+    }
+  ],
+  "tts": {
+    "handshake": 267,
+    "runs": [
+      {
+        "text": "रमेश शर्मा का ₹340 उधार ",
+        "firstAudioMs": 212,
+        "totalMs": 1069,
+        "audioSec": 5.28
+      },
+      {
+        "text": "आज ₹1,250 उधार गया, 4 एं",
+        "firstAudioMs": 158,
+        "totalMs": 772,
+        "audioSec": 3.92
+      },
+      {
+        "text": "Pinky ka ₹2,000 udhaar l",
+        "firstAudioMs": 199,
+        "totalMs": 569,
+        "audioSec": 2.56
+      }
+    ]
+  }
+}

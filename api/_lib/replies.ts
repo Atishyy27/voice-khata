@@ -1,5 +1,5 @@
-// Only hi-IN and en-IN were reviewed by a reader of the language. The other eight (kn, ta, te, ml, mr, bn, gu, pa)
-// are machine-written and need a native speaker's check before they are shown to a judge or a shopkeeper.
+// None of these ten packs has been checked by a native speaker yet. hi-IN, en-IN and kn-IN were run end to end;
+// the other seven (ta, te, ml, mr, bn, gu, pa) need a native speaker's check before a judge or shopkeeper hears them.
 import type { Reply } from "./types";
 
 interface Pack {

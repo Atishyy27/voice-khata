@@ -1,0 +1,72 @@
+{
+  "at": "2026-11-21T23:33:21.759Z",
+  "url": "wss://voice-khata-gray.vercel.app/api/ws",
+  "results": [
+    {
+      "file": "en-1.wav",
+      "ok": true,
+      "heard": "Write 500 credit for Pinky.",
+      "ops": [
+        "add Pinky 500 credit 2026-11-22"
+      ],
+      "reply": "Added ₹500 udhaar for Pinky. Total due ₹620.",
+      "clientFirstAudioMs": 896,
+      "serverFirstAudioMs": 807,
+      "sttMs": 103,
+      "parseMs": 517,
+      "ttsMs": 186
+    },
+    {
+      "file": "en-2.wav",
+      "ok": true,
+      "heard": "Anil paid 250 rupees.",
+      "ops": [
+        "add Anil 250 payment 2026-11-22"
+      ],
+      "reply": "Received ₹250 from Anil. Total due ₹150.",
+      "clientFirstAudioMs": 1034,
+      "serverFirstAudioMs": 970,
+      "sttMs": 279,
+      "parseMs": 532,
+      "ttsMs": 158
+    },
+    {
+      "file": "en-3.wav",
+      "ok": true,
+      "heard": "No, 300.",
+      "ops": [
+        "update {\"amount\":300}"
+      ],
+      "reply": "Fixed. Anil, ₹300 received. Total due ₹100.",
+      "clientFirstAudioMs": 806,
+      "serverFirstAudioMs": 743,
+      "sttMs": 214,
+      "parseMs": 425,
+      "ttsMs": 104
+    },
+    {
+      "file": "en-4.wav",
+      "ok": true,
+      "heard": "What is Sita's total?",
+      "ops": [],
+      "reply": "Sita owes ₹300.",
+      "clientFirstAudioMs": 831,
+      "serverFirstAudioMs": 690,
+      "sttMs": 115,
+      "parseMs": 470,
+      "ttsMs": 104
+    },
+    {
+      "file": "en-5.wav",
+      "ok": true,
+      "heard": "How much credit went out today?",
+      "ops": [],
+      "reply": "Today ₹2,470 udhaar given, 7 entries.",
+      "clientFirstAudioMs": 640,
+      "serverFirstAudioMs": 533,
+      "sttMs": 185,
+      "parseMs": 148,
+      "ttsMs": 200
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "at": "2026-11-21T23:32:55.273Z",
+  "url": "wss://voice-khata-gray.vercel.app/api/ws",
+  "results": [
+    {
+      "file": "kn-1.wav",
+      "ok": true,
+      "heard": "Ramesh Sharma ಅವರಿಗೆ 340 ರೂಪಾಯಿ ಸಾಲ ಬರೆಯಿರಿ.",
+      "ops": [
+        "add Ramesh Sharma 340 credit 2026-11-22"
+      ],
+      "reply": "ಉದ್ರಿ ಬರೆದೆ: Ramesh Sharma, ₹340. ಒಟ್ಟು ಬಾಕಿ ₹540.",
+      "clientFirstAudioMs": 952,
+      "serverFirstAudioMs": 861,
+      "sttMs": 214,
+      "parseMs": 496,
+      "ttsMs": 150
+    },
+    {
+      "file": "kn-2.wav",
+      "ok": true,
+      "heard": "ಸೀತಾ 200 ರೂಪಾಯಿ ಕೊಟ್ಟರು.",
+      "ops": [
+        "add Sita 200 payment 2026-11-22"
+      ],
+      "reply": "ಜಮಾ ಬರೆದೆ: Sita, ₹200. ಒಟ್ಟು ಬಾಕಿ ₹100.",
+      "clientFirstAudioMs": 919,
+      "serverFirstAudioMs": 842,
+      "sttMs": 232,
+      "parseMs": 459,
+      "ttsMs": 149
+    },
+    {
+      "file": "kn-3.wav",
+      "ok": true,
+      "heard": "ಇಲ್ಲ, 430.",
+      "ops": [
+        "update {\"amount\":430}"
+      ],
+      "reply": "ಸರಿಪಡಿಸಿದೆ. Sita, ₹430 ಜಮಾ. ₹130 ಹೆಚ್ಚು ಜಮಾ ಆಗಿದೆ.",
+      "clientFirstAudioMs": 873,
+      "serverFirstAudioMs": 786,
+      "sttMs": 181,
+      "parseMs": 486,
+      "ttsMs": 118
+    },
+    {
+      "file": "kn-4.wav",
+      "ok": true,
+      "heard": "ಮೋಹನ್ ಅವರ ಒಟ್ಟು ಬಾಕಿ ಎಷ್ಟು?",
+      "ops": [],
+      "reply": "ಒಟ್ಟು ಬಾಕಿ, Mohan: ₹800.",
+      "clientFirstAudioMs": 886,
+      "serverFirstAudioMs": 780,
+      "sttMs": 182,
+      "parseMs": 419,
+      "ttsMs": 178
+    }
+  ]
+}

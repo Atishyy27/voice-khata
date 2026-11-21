@@ -6,23 +6,39 @@ import WebSocket from "ws";
 
 const URL_ = process.argv.find((a) => a.startsWith("ws")) ?? "ws://localhost:3000/api/ws";
 const NOISE = process.argv.includes("--noise");
+const LANG = process.argv.find((a) => /^[a-z]{2}-IN$/.test(a)) ?? "hi-IN";
 const env = readFileSync(new URL("../.env.local", import.meta.url), "utf8");
 const KEY = env.match(/^GNANI_API_KEY=(.+)$/m)?.[1]?.trim().replace(/^"|"$/g, "");
 const AUDIO = new URL("../test-audio/", import.meta.url);
 mkdirSync(AUDIO, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const TURNS = [
-  { file: "line-1.wav", say: "रमेश का तीन सौ चालीस उधार लिखो", expect: { reply: "which" } },
+const SETS = {};
+SETS["hi-IN"] = [
+  { file: "line-1.wav", say: "रमेश का तीन सौ चालीस उधार लिखो", expect: { reply: "which", has: ["Ramesh Sharma", "Ramesh Doodhwala"] } },
   { file: "e2e-sharma.wav", say: "शर्मा जी वाले", expect: { reply: "added", name: "Ramesh Sharma", amount: 340, direction: "credit" } },
   { file: "line-6.wav", say: "नहीं, चार सौ तीस", expect: { reply: "corrected", amount: 430 } },
   { file: "line-3.wav", say: "सीता का बारह सौ पचास उधार", expect: { reply: "added", name: "Sita", amount: 1250, direction: "credit" } },
   { file: "line-4.wav", say: "Mohan paid five hundred rupees today", expect: { reply: "added", name: "Mohan", amount: 500, direction: "payment" } },
-  { file: "e2e-total.wav", say: "रमेश शर्मा का टोटल कितना है?", expect: { reply: "total" } },
-  { file: "e2e-today.wav", say: "आज कितना उधार गया?", expect: { reply: "today" } },
+  { file: "e2e-total.wav", say: "रमेश शर्मा का टोटल कितना है?", expect: { reply: "total", has: ["₹630"] } },
+  { file: "e2e-today.wav", say: "आज कितना उधार गया?", expect: { reply: "today", has: ["₹3,650"] } },
   { file: "line-8.wav", say: "पिंकी का two thousand उधार", expect: { reply: "added", name: "Pinky", amount: 2000, direction: "credit" } },
-  { file: "e2e-two.wav", say: "अनिल का पाँच सौ उधार, कल दो सौ दिया था", expect: { reply: "added", name: "Anil", amount: 500, direction: "credit" } },
+  { file: "e2e-two.wav", say: "अनिल का पाँच सौ उधार, कल दो सौ दिया था", expect: { reply: "added", name: "Anil", amount: 500, direction: "credit", opsCount: 2, second: { amount: 200, direction: "payment" } } },
 ];
+SETS["kn-IN"] = [
+  { file: "kn-1.wav", say: "ರಮೇಶ್ ಶರ್ಮಾ ಅವರಿಗೆ ಮುನ್ನೂರ ನಲವತ್ತು ರೂಪಾಯಿ ಸಾಲ ಬರೆಯಿರಿ", expect: { reply: "added", name: "Ramesh Sharma", amount: 340, direction: "credit" } },
+  { file: "kn-2.wav", say: "ಸೀತಾ ಇನ್ನೂರು ರೂಪಾಯಿ ಕೊಟ್ಟರು", expect: { reply: "added", name: "Sita", amount: 200, direction: "payment" } },
+  { file: "kn-3.wav", say: "ಇಲ್ಲ, ನಾನೂರ ಮೂವತ್ತು", expect: { reply: "corrected", amount: 430 } },
+  { file: "kn-4.wav", say: "ಮೋಹನ್ ಅವರ ಒಟ್ಟು ಬಾಕಿ ಎಷ್ಟು?", expect: { reply: "total", has: ["₹800"] } },
+];
+SETS["en-IN"] = [
+  { file: "en-1.wav", say: "Write five hundred credit for Pinky", expect: { reply: "added", name: "Pinky", amount: 500, direction: "credit" } },
+  { file: "en-2.wav", say: "Anil paid two hundred and fifty rupees", expect: { reply: "added", name: "Anil", amount: 250, direction: "payment" } },
+  { file: "en-3.wav", say: "No, three hundred", expect: { reply: "corrected", amount: 300 } },
+  { file: "en-4.wav", say: "What is Sita's total?", expect: { reply: "total", has: ["₹300"] } },
+  { file: "en-5.wav", say: "How much credit went out today?", expect: { reply: "today", has: ["₹2,470"] } },
+];
+const TURNS = SETS[LANG];
 
 const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
 const SEED = [
@@ -81,7 +97,7 @@ const next = (pred, ms) => new Promise((resolve) => {
 });
 
 await new Promise((r, j) => { ws.once("open", r); ws.once("error", j); });
-ws.send(JSON.stringify({ t: "hello", lang: "hi-IN", entries: SEED, greeted: true }));
+ws.send(JSON.stringify({ t: "hello", lang: LANG, entries: SEED, greeted: true }));
 if (!(await next((m) => m.t === "ready" || m.t === "error", 10000))?.some((m) => m.t === "ready")) throw new Error("no ready");
 
 const noiseSrc = pcmOf(await wavFor({ file: "line-7.wav" }));
@@ -115,7 +131,11 @@ for (const t of TURNS) {
     !err && sayMsg &&
     (e.amount === undefined || got.amount === e.amount) &&
     (e.direction === undefined || got.direction === e.direction) &&
-    (e.name === undefined || got.name === e.name || got.name === undefined);
+    (e.name === undefined || got.name === e.name || got.name === undefined) &&
+    (e.has ?? []).every((h) => (sayMsg.text ?? "").includes(h)) &&
+    (e.opsCount === undefined || ops.length === e.opsCount) &&
+    (e.second === undefined || (ops[1]?.entry?.amount === e.second.amount && ops[1]?.entry?.direction === e.second.direction)) &&
+    (e.reply === "which" || e.reply === "total" || e.reply === "today" ? ops.length === 0 : ops.length > 0);
   results.push({
     file: t.file, ok: Boolean(ok), heard: heard?.text, ops: ops.map((o) => (o.op === "add" ? `add ${o.entry.name} ${o.entry.amount} ${o.entry.direction} ${o.entry.date}` : `update ${JSON.stringify(o.patch)}`)),
     reply: sayMsg?.text, error: err?.message,
@@ -128,5 +148,5 @@ ws.close();
 const pass = results.filter((r) => r.ok).length;
 const lat = results.map((r) => r.clientFirstAudioMs).filter((x) => x != null).sort((a, b) => a - b);
 const pct = (p) => lat[Math.min(lat.length - 1, Math.floor(p * lat.length))];
-console.log(`PASS ${pass}/${results.length}  first audio p50 ${pct(0.5)} ms  p90 ${pct(0.9)} ms  (noise: ${NOISE})`);
-writeFileSync(new URL(`e2e-${NOISE ? "noise" : "clean"}.json`, AUDIO), JSON.stringify({ at: new Date().toISOString(), url: URL_, results }, null, 2));
+console.log(`PASS ${pass}/${results.length}  first audio p50 ${pct(0.5)} ms  p90 ${pct(0.9)} ms  (lang: ${LANG}, noise: ${NOISE})`);
+writeFileSync(new URL(`e2e-${LANG}-${NOISE ? "noise" : "clean"}.json`, AUDIO), JSON.stringify({ at: new Date().toISOString(), url: URL_, results }, null, 2));
