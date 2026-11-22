@@ -63,6 +63,10 @@ const talk = $("talk");
 
 let ws = null;
 let ready = false;
+// A typed message the server has not acknowledged yet. The server answers "heard" within about 100 ms, so 5 s of
+// silence means the message was lost (seen once on 22 Nov); the page reconnects and resends it once.
+let pendingText = "";
+let pendingTimer = 0;
 let held = false;
 let talking = false;
 let sending = false;
@@ -334,12 +338,18 @@ function onMessage(ev) {
       flushLog();
       if (!talking) setIdle();
       if (ctx && sessionStorage.getItem(greetedKey()) !== "1") send({ t: "greet" });
+      if (pendingText) {
+        send({ t: "text", text: pendingText });
+        pendingText = "";
+      }
       break;
     case "partial":
       onPartial(m.text);
       box().classList.add("live");
       break;
     case "heard": {
+      pendingText = "";
+      clearTimeout(pendingTimer);
       const t = cur();
       t.user.classList.remove("live");
       if (t.typed) t.typed = false; // a typed turn already shows its own text
@@ -514,6 +524,13 @@ function sendText() {
   queue = [];
   newTurn(true, text);
   send({ t: "text", text });
+  pendingText = text;
+  clearTimeout(pendingTimer);
+  pendingTimer = setTimeout(() => {
+    if (!pendingText) return;
+    log("reconnect", { attempt: -1 });
+    connect();
+  }, 5000);
   talk.classList.add("busy");
   setStatus("सोच रहा हूँ", "think");
 }

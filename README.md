@@ -26,6 +26,28 @@ When you pick a language it greets you and says it is an AI, in that language. I
 never plays, the next reply starts with the AI line instead; it counts as said only once a reply carrying it plays
 to the end. Switching language owes the disclosure again.
 
+## Two books, one chat
+
+The screen is a chat: speak (hold the mic) or type, and each turn shows what was heard, the reply, and cards for the
+entries it wrote.
+
+- **दुकान खाता** (default, BolBharat PS2): customer udhaar and jama, as above.
+- **घर का खर्चा**: household spending for whoever runs the house. "chai 20, auto 50, sabzi 120" adds three expenses with
+  categories; "Rahul ke saath dinner 1200, aadha mera" adds a split (your share ₹600, Rahul owes ₹600);
+  "aaj kitna kharcha hua", "is mahine khane pe kitna" answer from the same records.
+
+## 24 Indian languages
+
+| Tier | Languages | How |
+|---|---|---|
+| Native (Gnani) | Hindi, Bengali, Marathi, Tamil, Telugu, Gujarati, Kannada, Malayalam, Punjabi, plus English | Prisma and Timbre directly |
+| Beta | Odia, Urdu, Bhojpuri, Maithili, Konkani, Kashmiri, Santali, Tulu, Nepali, Sindhi, Assamese | heard and spoken through a close Gnani language (Odia and Assamese through Bengali, Tulu through Kannada, Konkani through Marathi, the rest through Hindi); replies are written in the user's own language and, for Odia, re-lettered into Bengali script only for the voice |
+| Experimental | Dogri, Manipuri, Sanskrit, Bodo | same trick, lower clarity |
+
+The beta order comes from a clarity screen in our earlier project (how many words Prisma recovered from the sister
+voice). Replies for the 15 non-native languages are machine-translated and have not been checked by native speakers;
+the language picker says so.
+
 ## How it works
 
 ```mermaid
