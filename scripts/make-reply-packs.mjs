@@ -21,7 +21,7 @@ const tokens = (s) => (s.match(/\{\w+\}/g) ?? []).sort().join(" ");
 
 const existing = existsSync(PACK_PATH) ? JSON.parse(readFileSync(PACK_PATH, "utf8")) : {};
 
-const MODEL = "gemini-2.5-flash";
+const MODEL = process.env.PACK_MODEL ?? "gemini-2.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
 async function translate(lang, keys) {
