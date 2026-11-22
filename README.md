@@ -73,7 +73,7 @@ toggle only appears after the hook reports the sheet's link.
 | Service | How we call it | Settings that matter |
 |---|---|---|
 | **Prisma v3.0, realtime streaming STT** | `wss://api.vachana.ai/stt/v3/stream` | `model=prisma-v3.0`, one `language_code` per session, `format=transcribe` (the model writes amounts as digits), `keyterms` = the Latin-script customer names known when the session connects (max 200), `topic`, `x-min-silence-ms=2000` because the button release ends each utterance, `x-partials: true` for live words |
-| **Timbre v3.0, realtime TTS** | `wss://api.vachana.ai/api/v1/tts` | voice `Shivani`, raw PCM 24 kHz, socket kept warm between turns; ₹ amounts are left to Timbre's text normalisation |
+| **Timbre v3.0, realtime TTS** | `wss://api.vachana.ai/api/v1/tts` | voice `Shivani`, raw PCM 24 kHz, a fresh socket per reply opened before it is needed, a 5 s first-audio watchdog with one retry; ₹ amounts are left to Timbre's text normalisation |
 
 LLM: Groq `openai/gpt-oss-20b` with JSON output, falling back to `gpt-oss-120b` and then Gemini Flash-Lite. Groq's
 free tier allows the 20b model 8,000 tokens a minute (about 9 turns), so a fast run spills to the fallbacks. Orchestration: our own
@@ -81,8 +81,8 @@ TypeScript on Vercel Functions WebSockets. No hosted agent platform, no telephon
 
 Two things we found that differ from the docs (22 Nov 2026): the streaming endpoint rejects a comma-separated
 language list such as `hi-IN,en-IN` (reproduce with `node scripts/probe-headers.mjs`), so each session uses the one language the shopkeeper picked; English words
-inside Hindi still come through. And a late `complete` from one Timbre request can arrive after the next request
-starts on the same socket, so we count audio only after that request's own `start`.
+inside Hindi still come through. And reusing one Timbre socket for several replies once left a reply waiting forever in a live run, so each
+reply now gets its own socket, opened ahead of time.
 
 ## Measured results
 
@@ -93,10 +93,13 @@ the 150 ms the page keeps listening after release.
 
 | Run | Turns correct | First audio p50 | p90 | File |
 |---|---|---|---|---|
-| Hindi and code-mix (which-Ramesh question, correction, totals, two entries in one sentence) | 9/9 | 954 ms | 1,152 ms | `docs/results/live-e2e-hi-IN-clean.json` |
-| Same 9 turns with chatter | 9/9 | 890 ms | 1,723 ms | `docs/results/live-e2e-hi-IN-noise.json` |
-| Kannada | 4/4 | 958 ms | 1,080 ms | `docs/results/live-e2e-kn-IN-clean.json` |
-| English | 5/5 | 787 ms | 870 ms | `docs/results/live-e2e-en-IN-clean.json` |
+| Hindi and code-mix (which-Ramesh question, correction, totals, two entries in one sentence) | 9/9 | 904 ms | 1,731 ms | `docs/results/live-e2e-hi-IN-clean.json` |
+| Same 9 turns with chatter | 9/9 | 788 ms | 1,112 ms | `docs/results/live-e2e-hi-IN-noise.json` |
+| Kannada | 4/4 | 1,098 ms | 1,248 ms | `docs/results/live-e2e-kn-IN-clean.json` |
+| English | 5/5 | 913 ms | 934 ms | `docs/results/live-e2e-en-IN-clean.json` |
+
+Barge-in (`scripts/bargein.mjs`, live): a reply interrupted 0.5 s into its audio never finished, the next turn
+completed, no errors.
 
 A turn counts as correct when the amount, the credit or payment direction and the customer all match, or the
 reply carries the expected names or ₹ total and changes nothing. The committed records came from these runs;

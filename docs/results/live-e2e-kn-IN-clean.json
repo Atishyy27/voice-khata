@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-22T08:25:14.051Z",
+  "at": "2026-11-22T11:54:54.620Z",
   "url": "wss://voice-khata-gray.vercel.app/api/ws",
   "results": [
     {
@@ -11,11 +11,11 @@
       ],
       "reply": "ಉದ್ರಿ ಬರೆದೆ: Ramesh Sharma, ₹340. ಒಟ್ಟು ಬಾಕಿ ₹540.",
       "partials": 5,
-      "clientFirstAudioMs": 958,
-      "serverFirstAudioMs": 884,
-      "sttMs": 257,
-      "parseMs": 529,
-      "ttsMs": 97
+      "clientFirstAudioMs": 789,
+      "serverFirstAudioMs": 722,
+      "sttMs": 164,
+      "parseMs": 442,
+      "ttsMs": 115
     },
     {
       "file": "kn-2.wav",
@@ -26,11 +26,11 @@
       ],
       "reply": "ಜಮಾ ಬರೆದೆ: Sita, ₹200. ಒಟ್ಟು ಬಾಕಿ ₹100.",
       "partials": 2,
-      "clientFirstAudioMs": 1080,
-      "serverFirstAudioMs": 1024,
-      "sttMs": 335,
-      "parseMs": 558,
-      "ttsMs": 131
+      "clientFirstAudioMs": 1098,
+      "serverFirstAudioMs": 989,
+      "sttMs": 295,
+      "parseMs": 533,
+      "ttsMs": 161
     },
     {
       "file": "kn-3.wav",
@@ -40,12 +40,12 @@
         "update {\"amount\":430}"
       ],
       "reply": "ಸರಿಪಡಿಸಿದೆ. Sita, ₹430 ಜಮಾ. ₹130 ಹೆಚ್ಚು ಜಮಾ ಆಗಿದೆ.",
-      "partials": 2,
-      "clientFirstAudioMs": 937,
-      "serverFirstAudioMs": 888,
-      "sttMs": 231,
-      "parseMs": 452,
-      "ttsMs": 204
+      "partials": 3,
+      "clientFirstAudioMs": 691,
+      "serverFirstAudioMs": 571,
+      "sttMs": 219,
+      "parseMs": 160,
+      "ttsMs": 191
     },
     {
       "file": "kn-4.wav",
@@ -53,12 +53,12 @@
       "heard": "ಮೋಹನ್ ಅವರ ಒಟ್ಟು ಬಾಕಿ ಎಷ್ಟು?",
       "ops": [],
       "reply": "ಒಟ್ಟು ಬಾಕಿ, Mohan: ₹800.",
-      "partials": 3,
-      "clientFirstAudioMs": 812,
-      "serverFirstAudioMs": 738,
-      "sttMs": 183,
-      "parseMs": 402,
-      "ttsMs": 153
+      "partials": 2,
+      "clientFirstAudioMs": 1248,
+      "serverFirstAudioMs": 875,
+      "sttMs": 237,
+      "parseMs": 510,
+      "ttsMs": 127
     }
   ]
 }

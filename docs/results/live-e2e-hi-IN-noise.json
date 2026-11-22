@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-22T08:26:15.714Z",
+  "at": "2026-11-22T11:55:56.071Z",
   "url": "wss://voice-khata-gray.vercel.app/api/ws",
   "results": [
     {
@@ -9,11 +9,11 @@
       "ops": [],
       "reply": "कौन से Ramesh? Ramesh Sharma या Ramesh Doodhwala?",
       "partials": 4,
-      "clientFirstAudioMs": 785,
-      "serverFirstAudioMs": 724,
-      "sttMs": 228,
-      "parseMs": 341,
-      "ttsMs": 154
+      "clientFirstAudioMs": 744,
+      "serverFirstAudioMs": 682,
+      "sttMs": 225,
+      "parseMs": 352,
+      "ttsMs": 104
     },
     {
       "file": "e2e-sharma.wav",
@@ -24,11 +24,11 @@
       ],
       "reply": "Ramesh Sharma का ₹340 उधार लिखा। कुल बाकी ₹540।",
       "partials": 1,
-      "clientFirstAudioMs": 907,
-      "serverFirstAudioMs": 815,
-      "sttMs": 114,
-      "parseMs": 580,
-      "ttsMs": 120
+      "clientFirstAudioMs": 635,
+      "serverFirstAudioMs": 584,
+      "sttMs": 109,
+      "parseMs": 361,
+      "ttsMs": 113
     },
     {
       "file": "line-6.wav",
@@ -39,11 +39,11 @@
       ],
       "reply": "ठीक किया। Ramesh Sharma का ₹430 उधार। कुल बाकी ₹630।",
       "partials": 2,
-      "clientFirstAudioMs": 975,
-      "serverFirstAudioMs": 912,
-      "sttMs": 299,
-      "parseMs": 507,
-      "ttsMs": 105
+      "clientFirstAudioMs": 1082,
+      "serverFirstAudioMs": 1013,
+      "sttMs": 355,
+      "parseMs": 484,
+      "ttsMs": 173
     },
     {
       "file": "line-3.wav",
@@ -54,11 +54,11 @@
       ],
       "reply": "Sita का ₹1,250 उधार लिखा। कुल बाकी ₹1,550।",
       "partials": 3,
-      "clientFirstAudioMs": 743,
-      "serverFirstAudioMs": 682,
-      "sttMs": 260,
-      "parseMs": 264,
-      "ttsMs": 157
+      "clientFirstAudioMs": 583,
+      "serverFirstAudioMs": 534,
+      "sttMs": 204,
+      "parseMs": 216,
+      "ttsMs": 114
     },
     {
       "file": "line-4.wav",
@@ -68,12 +68,12 @@
         "add Mohan 500 payment 2026-11-22"
       ],
       "reply": "Mohan से ₹500 जमा। कुल बाकी ₹300।",
-      "partials": 3,
-      "clientFirstAudioMs": 747,
-      "serverFirstAudioMs": 689,
-      "sttMs": 139,
-      "parseMs": 431,
-      "ttsMs": 118
+      "partials": 2,
+      "clientFirstAudioMs": 1112,
+      "serverFirstAudioMs": 1044,
+      "sttMs": 282,
+      "parseMs": 576,
+      "ttsMs": 184
     },
     {
       "file": "e2e-total.wav",
@@ -82,11 +82,11 @@
       "ops": [],
       "reply": "Ramesh Sharma का कुल बाकी ₹630।",
       "partials": 3,
-      "clientFirstAudioMs": 1723,
-      "serverFirstAudioMs": 1371,
-      "sttMs": 240,
-      "parseMs": 974,
-      "ttsMs": 156
+      "clientFirstAudioMs": 759,
+      "serverFirstAudioMs": 700,
+      "sttMs": 98,
+      "parseMs": 391,
+      "ttsMs": 210
     },
     {
       "file": "e2e-today.wav",
@@ -95,11 +95,11 @@
       "ops": [],
       "reply": "आज ₹3,650 उधार गया, 8 एंट्री।",
       "partials": 2,
-      "clientFirstAudioMs": 770,
-      "serverFirstAudioMs": 721,
-      "sttMs": 167,
-      "parseMs": 370,
-      "ttsMs": 183
+      "clientFirstAudioMs": 788,
+      "serverFirstAudioMs": 728,
+      "sttMs": 117,
+      "parseMs": 507,
+      "ttsMs": 103
     },
     {
       "file": "line-8.wav",
@@ -110,11 +110,11 @@
       ],
       "reply": "Pinky का ₹2,000 उधार लिखा। कुल बाकी ₹2,120।",
       "partials": 2,
-      "clientFirstAudioMs": 890,
-      "serverFirstAudioMs": 843,
-      "sttMs": 241,
-      "parseMs": 499,
-      "ttsMs": 102
+      "clientFirstAudioMs": 813,
+      "serverFirstAudioMs": 673,
+      "sttMs": 130,
+      "parseMs": 445,
+      "ttsMs": 98
     },
     {
       "file": "e2e-two.wav",
@@ -126,11 +126,11 @@
       ],
       "reply": "Anil का ₹500 उधार लिखा। Anil से ₹200 जमा। कुल बाकी ₹700।",
       "partials": 4,
-      "clientFirstAudioMs": 901,
-      "serverFirstAudioMs": 847,
-      "sttMs": 345,
-      "parseMs": 271,
-      "ttsMs": 231
+      "clientFirstAudioMs": 1074,
+      "serverFirstAudioMs": 1017,
+      "sttMs": 181,
+      "parseMs": 616,
+      "ttsMs": 219
     }
   ]
 }
