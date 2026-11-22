@@ -2,7 +2,7 @@
 
 A khata (credit ledger) a kirana shopkeeper talks to across the counter. Hold one button, say
 "Ramesh ka 340 udhaar, kal 200 diya tha", let go, and the phone answers in your language (median first audio
-under 1 s across our Hindi, English and Kannada runs; not yet measured with a timer on a phone) and updates the khata. No typing. Built for BolBharat (Gnani x HackBriven), track PS2.
+0.8 to 1.1 s across our Hindi, English and Kannada runs; not yet measured with a timer on a phone) and updates the khata. No typing. Built for BolBharat (Gnani x HackBriven), track PS2.
 
 **Live:** https://voice-khata-gray.vercel.app (built for Chrome on a low-end Android phone; on a laptop, hold the
 space bar)
