@@ -138,7 +138,7 @@ for (const t of TURNS) {
     (e.reply === "which" || e.reply === "total" || e.reply === "today" ? ops.length === 0 : ops.length > 0);
   results.push({
     file: t.file, ok: Boolean(ok), heard: heard?.text, ops: ops.map((o) => (o.op === "add" ? `add ${o.entry.name} ${o.entry.amount} ${o.entry.direction} ${o.entry.date}` : `update ${JSON.stringify(o.patch)}`)),
-    reply: sayMsg?.text, error: err?.message,
+    reply: sayMsg?.text, error: err?.message, partials: msgs.filter((m) => m.t === "partial").length,
     clientFirstAudioMs: firstBin ? firstBin.at - releasedAt : null, serverFirstAudioMs: said?.firstAudioMs, sttMs: said?.sttMs, parseMs: said?.parseMs, ttsMs: said?.ttsMs,
   });
   console.log(JSON.stringify(results.at(-1)));

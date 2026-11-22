@@ -95,7 +95,12 @@ function onMessage(ev) {
       if (!talking) setIdle();
       if (ctx && sessionStorage.getItem(greetedKey()) !== "1") send({ t: "greet" });
       break;
+    case "partial":
+      $("heard").textContent = m.text;
+      $("heard").classList.add("live");
+      break;
     case "heard":
+      $("heard").classList.remove("live");
       $("heard").textContent = m.text || "-";
       $("reply").textContent = "-";
       break;

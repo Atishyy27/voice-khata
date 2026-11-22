@@ -122,6 +122,9 @@ export class Session {
       onSpeechStart: () => {
         this.speechOpen = true;
       },
+      onPartial: (text) => {
+        if (text.trim()) this.send({ t: "partial", text: [...this.segments, text.trim()].join(" ") });
+      },
       onTranscript: (text, lang) => {
         this.speechOpen = false;
         if (text.trim()) this.segments.push(text.trim());

@@ -13,6 +13,7 @@ const cases: [string, boolean][] = [
   ["अनिल ने परसों 750 दिए।", false], ["पिंकी का 2000 उधार।", false], ["रमेश का total कितना है?", false],
   ["ರಮೇಶ್ ಅವರಿಗೆ 340 ರೂಪಾಯಿ ಸಾಲ.", false], ["रमेश शर्मा का 340 उधार, कल 200 दिया था", false],
   ["आज कितना उधार गया?", false], ["दूध वाले", true],
+  ["पहले वाले", true], ["दूसरे वाले", true], ["शर्मा जी", true], ["जो दूध देते हैं वो", true], ["Sharma wale Ramesh", true],
 ];
 (async () => {
   for (const [text, pending] of cases) {

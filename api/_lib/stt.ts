@@ -4,8 +4,11 @@ import WebSocket from "ws";
 // window is set to its maximum and a natural pause mid-sentence does not split the entry.
 // Measured 22 Nov 2026: a comma-separated language list is rejected on this endpoint (docs say it works),
 // so the session uses one locale; format=transcribe makes the model write amounts as digits.
+// Partials: undocumented, but the connected config echoes partials_enabled, and the header x-partials: true turns
+// it on (22 Nov 2026). Partials then arrive about every 600 ms and the final message type becomes final_transcript.
 export interface SttEvents {
   onTranscript: (text: string, lang: string | undefined, serverMs: number | undefined) => void;
+  onPartial: (text: string) => void;
   onSpeechStart: () => void;
   onError: (message: string) => void;
   onClose: () => void;
@@ -40,6 +43,7 @@ export class SttStream {
         "x-sample-rate": "16000",
         "x-idle-timeout-sec": "300",
         "x-min-silence-ms": "2000",
+        "x-partials": "true",
       },
     });
     this.ws = ws;
@@ -66,7 +70,9 @@ export class SttStream {
         }
         if (m.type === "connected") resolve();
         else if (m.type === "speech_start") this.events.onSpeechStart();
-        else if (m.type === "transcript") this.events.onTranscript(String(m.text ?? ""), m.detected_language_code, m.latency);
+        else if (m.type === "partial_transcript") this.events.onPartial(String(m.text ?? ""));
+        else if (m.type === "transcript" || m.type === "final_transcript")
+          this.events.onTranscript(String(m.text ?? ""), m.detected_language_code, m.latency);
         else if (m.type === "error") this.events.onError(String(m.message ?? "speech error"));
       });
     });
