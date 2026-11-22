@@ -16,6 +16,11 @@
     <button id="langbtn" class="chip" type="button">भाषा बदलें</button>
   </header>
 
+  <nav class="modes" role="tablist" aria-label="मोड चुनें">
+    <button id="modeKhata" class="mode" type="button" role="tab" aria-selected="true">दुकान खाता</button>
+    <button id="modeKharcha" class="mode" type="button" role="tab" aria-selected="false">घर का खर्चा</button>
+  </nav>
+
   <div class="page">
     <section id="summary">
       <div class="tile"><span>कुल बाकी</span><b id="sumDue">₹0</b></div>
@@ -25,18 +30,10 @@
 
     <div id="status" role="status" aria-live="polite">...</div>
 
-    <section class="card">
-      <div class="label">सुना</div>
-      <div id="heard" class="caption">-</div>
-    </section>
+    <div id="thread"></div>
 
-    <section class="card">
-      <span id="badge"></span>
-      <div class="label">जवाब</div>
-      <div id="reply">-</div>
-    </section>
-
-    <h2 class="section">खाता</h2>
+    <h2 class="section" id="ledgerTitle">खाता</h2>
+    <div id="catBar" hidden></div>
     <ul id="ledger"></ul>
 
     <footer class="foot">
@@ -46,9 +43,19 @@
   </div>
 </main>
 
-<div class="dock">
-  <div id="timer">0:00</div>
-  <button id="talk" type="button">दबाकर बोलें</button>
+<div class="composer">
+  <div class="cmp-row">
+    <input id="textIn" type="text" maxlength="300" autocomplete="off" enterkeyhint="send" placeholder="लिखें या बोलें... जैसे: चाय 20, ऑटो 50">
+    <button id="send" class="send" type="button" aria-label="भेजें">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+    <div class="mic-wrap">
+      <div id="timer">0:00</div>
+      <button id="talk" type="button" aria-label="दबाकर बोलें">
+        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-2.08A7 7 0 0 0 19 12h-2z"/></svg>
+      </button>
+    </div>
+  </div>
   <div id="hint">दबाकर रखें, बोलें, छोड़ें</div>
 </div>
 

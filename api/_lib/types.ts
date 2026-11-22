@@ -9,7 +9,54 @@ export interface Entry {
   date: string; // YYYY-MM-DD
   at: string; // ISO
   note?: string;
+  book?: "khata";
 }
+
+export interface Split {
+  with: string;
+  myShare: number;
+}
+
+export interface Expense {
+  id: string;
+  book: "kharcha";
+  item: string;
+  category: string;
+  amount: number;
+  date: string; // YYYY-MM-DD
+  at: string; // ISO
+  note?: string;
+  split?: Split;
+}
+
+export type KharchaKind = "add" | "correct" | "query_today" | "query_month" | "query_category" | "other";
+
+export interface KharchaItem {
+  item: string;
+  amount: number;
+  category: string;
+  dayOffset: number;
+  note?: string;
+  split?: Split;
+}
+
+export interface KharchaIntent {
+  kind: KharchaKind;
+  items?: KharchaItem[];
+  fix?: { item?: string; amount?: number; category?: string };
+  category?: string;
+}
+
+export type KharchaOp = { op: "add"; entry: Expense } | { op: "update"; id: string; patch: Partial<Expense> };
+
+export type KharchaReply =
+  | { key: "kh_added"; items: { item: string; amount: number; myShare?: number; with?: string }[]; todayTotal: number }
+  | { key: "kh_corrected"; item: string; amount: number; todayTotal: number }
+  | { key: "kh_today"; amount: number; count: number }
+  | { key: "kh_month"; amount: number; count: number }
+  | { key: "kh_category"; category: string; amount: number }
+  | { key: "kh_nothing" }
+  | { key: "kh_help" };
 
 export interface ParsedEntry {
   name: string;

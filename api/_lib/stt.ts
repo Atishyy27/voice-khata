@@ -7,9 +7,9 @@ import WebSocket from "ws";
 // Partials: undocumented, but the connected config echoes partials_enabled, and the header x-partials: true turns
 // it on (22 Nov 2026). Partials then arrive about every 600 ms and the final message type becomes final_transcript.
 export interface SttEvents {
-  onTranscript: (text: string, lang: string | undefined, serverMs: number | undefined) => void;
+  onTranscript: (text: string, lang: string | undefined, serverMs: number | undefined, utterance?: string) => void;
   onPartial: (text: string) => void;
-  onSpeechStart: () => void;
+  onSpeechStart: (utterance?: string) => void;
   onError: (message: string) => void;
   onClose: () => void;
 }
@@ -69,10 +69,10 @@ export class SttStream {
           return;
         }
         if (m.type === "connected") resolve();
-        else if (m.type === "speech_start") this.events.onSpeechStart();
+        else if (m.type === "speech_start") this.events.onSpeechStart(m.utterance_id);
         else if (m.type === "partial_transcript") this.events.onPartial(String(m.text ?? ""));
         else if (m.type === "transcript" || m.type === "final_transcript")
-          this.events.onTranscript(String(m.text ?? ""), m.detected_language_code, m.latency);
+          this.events.onTranscript(String(m.text ?? ""), m.detected_language_code, m.latency, m.utterance_id);
         else if (m.type === "error") this.events.onError(String(m.message ?? "speech error"));
       });
     });

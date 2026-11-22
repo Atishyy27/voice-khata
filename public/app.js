@@ -1,15 +1,46 @@
 import { allEntries, applyOps, resetDemo } from "./store.js";
 import { createPlayer } from "./player.js";
 
+// [code, native name, tier]. Tiers: native, beta, exp (picker groups below).
 const LANGS = [
-  ["hi-IN", "हिन्दी"], ["en-IN", "English"], ["kn-IN", "ಕನ್ನಡ"], ["ta-IN", "தமிழ்"], ["te-IN", "తెలుగు"],
-  ["ml-IN", "മലയാളം"], ["mr-IN", "मराठी"], ["bn-IN", "বাংলা"], ["gu-IN", "ગુજરાતી"], ["pa-IN", "ਪੰਜਾਬੀ"],
+  ["hi-IN", "हिन्दी", "native"], ["en-IN", "English", "native"], ["bn-IN", "বাংলা", "native"],
+  ["mr-IN", "मराठी", "native"], ["ta-IN", "தமிழ்", "native"], ["te-IN", "తెలుగు", "native"],
+  ["gu-IN", "ગુજરાતી", "native"], ["kn-IN", "ಕನ್ನಡ", "native"], ["ml-IN", "മലയാളം", "native"],
+  ["pa-IN", "ਪੰਜਾਬੀ", "native"],
+  ["or-IN", "ଓଡ଼ିଆ", "beta"], ["ur-IN", "اردو", "beta"], ["bho-IN", "भोजपुरी", "beta"],
+  ["mai-IN", "मैथिली", "beta"], ["kok-IN", "कोंकणी", "beta"], ["ks-IN", "कॉशुर", "beta"],
+  ["sat-IN", "संताली", "beta"], ["tcy-IN", "ತುಳು", "beta"], ["ne-IN", "नेपाली", "beta"],
+  ["sd-IN", "सिन्धी", "beta"], ["as-IN", "অসমীয়া", "beta"],
+  ["doi-IN", "डोगरी", "exp"], ["mni-IN", "মৈতৈলোন্", "exp"], ["sa-IN", "संस्कृतम्", "exp"],
+  ["brx-IN", "बड़ो", "exp"],
 ];
+const TIERS = [
+  ["native", "भाषाएँ", ""],
+  ["beta", "Beta · बहन-भाषा की आवाज़", "अनुवाद मशीन से, जाँच बाकी"],
+  ["exp", "Experimental", ""],
+];
+const TIER_TAG = { beta: "Beta", exp: "Exp" };
+
+const MODES = ["khata", "kharcha"];
+const MODE_KEY = "vk-mode";
+const TILE_LABELS = {
+  khata: ["कुल बाकी", "आज उधार", "ग्राहक"],
+  kharcha: ["आज खर्चा", "इस महीने", "सबसे ज़्यादा"],
+};
+const CAT_LABEL = {
+  khana: "खाना", rashan: "राशन", "doodh-sabzi": "दूध-सब्ज़ी", ghar: "घर", "bijli-paani": "बिजली-पानी",
+  "phone-recharge": "फ़ोन रिचार्ज", safar: "सफ़र", dawai: "दवाई", padhai: "पढ़ाई", kapde: "कपड़े",
+  tyohar: "त्योहार", "udhaar-diya": "उधार दिया", other: "अन्य",
+};
+const catLabel = (c) => CAT_LABEL[c] || CAT_LABEL.other;
+
 const LANG_KEY = "vk-lang";
 const SHEET_KEY = "vk-sheet";
 const greetedKey = () => "vk-greeted-" + lang; // per language: the AI disclosure is owed again in a new language
 const TAIL_MS = 150; // keep sending briefly after release so the last syllable is not cut
 const LOG_MAX = 50;
+const MAX_TURNS = 30;
+const TEXT_MAX = 300;
 const $ = (id) => document.getElementById(id);
 const rupee = new Intl.NumberFormat("en-IN");
 const money = (n) => (n < 0 ? "-" : "") + "₹" + rupee.format(Math.abs(n));
@@ -25,8 +56,9 @@ const langFromHash = () => { const h = location.hash.slice(1); return LANGS.some
 const savedLang = localStorage.getItem(LANG_KEY);
 let lang = langFromHash() || (LANGS.some(([c]) => c === savedLang) ? savedLang : null);
 let sheetOn = localStorage.getItem(SHEET_KEY) === "1";
+const savedMode = localStorage.getItem(MODE_KEY);
+let mode = MODES.includes(savedMode) ? savedMode : "khata";
 
-const heardEl = $("heard");
 const talk = $("talk");
 
 let ws = null;
@@ -52,6 +84,7 @@ let toastTimer = 0;
 let revealTimer = 0;
 let shownWords = [];
 let queue = [];
+let turn = null; // latest chat turn: { root, user, bot, reply, badge, cards, typed }
 const logQueue = [];
 const expanded = new Set();
 
@@ -73,7 +106,7 @@ function toast(text) {
 function setTalking(on) {
   talking = on;
   talk.classList.toggle("on", on);
-  talk.textContent = on ? "बोलिए..." : "दबाकर बोलें";
+  talk.setAttribute("aria-label", on ? "बोलिए..." : "दबाकर बोलें");
 }
 
 function startMeter() {
@@ -114,19 +147,70 @@ function flushLog() {
   while (logQueue.length && ws && ws.readyState === WebSocket.OPEN) send(logQueue.shift());
 }
 
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+// ---- Chat thread ----
+
+function cur() { return turn || newTurn(false); }
+function box() { return cur().user; } // the pending user bubble's text span (#heard)
+function scrollThread() { const t = $("thread"); t.scrollTop = t.scrollHeight; }
+
+// Starts a turn: a user bubble (#heard holds the live or final words) and an assistant bubble
+// (#reply holds the reply text, #badge the latency chip). Ids move to the newest turn.
+function newTurn(typed, text = "") {
+  const thread = $("thread");
+  if (turn) {
+    turn.user.removeAttribute("id");
+    turn.reply.removeAttribute("id");
+    turn.badge.removeAttribute("id");
+  }
+  const root = el("div", "turn");
+
+  const user = el("span", "caption", text);
+  user.id = "heard";
+  const userBubble = el("div", "bubble me");
+  userBubble.append(user);
+  const userMsg = el("div", "msg me");
+  userMsg.append(userBubble);
+
+  const reply = el("div", "", "-");
+  reply.id = "reply";
+  const badge = el("span", "");
+  badge.id = "badge";
+  const cards = el("div", "cards");
+  const botMsg = el("div", "msg bot");
+  botMsg.hidden = !typed; // a voice turn shows its assistant bubble once the words are heard
+  const botBubble = el("div", "bubble bot");
+  botBubble.append(reply, badge, cards);
+  botMsg.append(botBubble);
+
+  root.append(userMsg, botMsg);
+  thread.append(root);
+  while (thread.children.length > MAX_TURNS) thread.firstElementChild.remove();
+  turn = { root, user, bot: botMsg, reply, badge, cards, typed };
+  scrollThread();
+  return turn;
+}
+
 function paint(fresh, allStable) {
+  const heard = box();
   const n = shownWords.length;
-  const spans = [...heardEl.querySelectorAll(".w")];
-  if (!spans.length) heardEl.textContent = "";
+  const spans = [...heard.querySelectorAll(".w")];
+  if (!spans.length) heard.textContent = "";
   while (spans.length > n) {
     const s = spans.pop();
     if (s.previousSibling && s.previousSibling.nodeType === Node.TEXT_NODE) s.previousSibling.remove();
     s.remove();
   }
   for (let i = spans.length; i < n; i++) {
-    if (i > 0) heardEl.append(" ");
+    if (i > 0) heard.append(" ");
     const s = el("span", "w");
-    heardEl.append(s);
+    heard.append(s);
     spans.push(s);
   }
   spans.forEach((s, i) => {
@@ -168,8 +252,27 @@ function onHeard(text) {
   queue = [];
   shownWords = splitWords(text);
   paint(false, true);
-  if (!shownWords.length) heardEl.textContent = "-";
+  if (!shownWords.length) box().textContent = "-";
 }
+
+// One card per entry a turn created or changed. Khata: name, amount, udhaar or jama.
+// Household: item, amount, category.
+function entryCard(e) {
+  const card = el("div", "kcard");
+  if (e.book === "kharcha") {
+    card.append(el("span", "kc-main", e.item || ""), el("span", "kc-amt", money(e.amount)), el("span", "kchip", catLabel(e.category)));
+  } else {
+    const credit = e.direction !== "payment";
+    card.append(
+      el("span", "kc-main", e.name || ""),
+      el("span", "kc-amt", money(e.amount)),
+      el("span", credit ? "kchip cr" : "kchip pm", credit ? "उधार" : "जमा"),
+    );
+  }
+  return card;
+}
+
+// ---- Socket ----
 
 function connect() {
   clearTimeout(retryTimer);
@@ -187,7 +290,7 @@ function connect() {
       () => setStatus("सर्वर से जवाब नहीं आया। नेटवर्क जाँचें, फिर पेज दोबारा खोलें।", "err"), 8000);
     const entries = await allEntries();
     if (sock === ws && sock.readyState === WebSocket.OPEN) {
-      sock.send(JSON.stringify({ t: "hello", lang, entries, greeted: sessionStorage.getItem(greetedKey()) === "1", sheet: sheetOn }));
+      sock.send(JSON.stringify({ t: "hello", lang, entries, greeted: sessionStorage.getItem(greetedKey()) === "1", sheet: sheetOn, mode }));
       log("ws_open");
     }
   };
@@ -234,27 +337,45 @@ function onMessage(ev) {
       break;
     case "partial":
       onPartial(m.text);
-      heardEl.classList.add("live");
+      box().classList.add("live");
       break;
-    case "heard":
-      heardEl.classList.remove("live");
-      onHeard(m.text);
-      $("reply").textContent = "-";
+    case "heard": {
+      const t = cur();
+      t.user.classList.remove("live");
+      if (t.typed) t.typed = false; // a typed turn already shows its own text
+      else onHeard(m.text);
+      t.reply.textContent = "-";
+      t.bot.hidden = false;
       break;
-    case "ops":
-      applyOps(m.ops).then(render);
+    }
+    case "ops": {
+      const t = cur();
+      applyOps(m.ops).then(async () => {
+        render();
+        const byId = new Map((await allEntries()).map((e) => [e.id, e]));
+        for (const op of m.ops || []) {
+          const e = op.op === "add" ? op.entry : byId.get(op.id);
+          if (e) t.cards.append(entryCard(e));
+        }
+        scrollThread();
+      });
       break;
-    case "say":
+    }
+    case "say": {
+      const t = cur();
       talk.classList.remove("busy");
       accepting = true;
       clearTimeout(idleTimer);
-      $("reply").textContent = m.text || "-";
+      t.reply.textContent = m.text || "-";
+      t.bot.hidden = false;
       if (!talking) setStatus("बोल रहा हूँ", "speak");
+      scrollThread();
       break;
+    }
     case "said":
       sessionStorage.setItem(greetedKey(), "1");
       if (m.firstAudioMs != null) {
-        $("badge").textContent = ((m.firstAudioMs + TAIL_MS) / 1000).toFixed(2) + " s";
+        cur().badge.textContent = ((m.firstAudioMs + TAIL_MS) / 1000).toFixed(2) + " s";
         log("first_audio", { ms: m.firstAudioMs });
       }
       if (player && ctx) {
@@ -316,6 +437,8 @@ async function ensureAudio() {
   await micPromise;
 }
 
+// ---- Hold to talk ----
+
 async function press() {
   if (held || !lang) return;
   held = true;
@@ -334,8 +457,6 @@ async function press() {
   revealTimer = 0;
   shownWords = [];
   queue = [];
-  heardEl.textContent = "";
-  heardEl.classList.remove("live");
   try {
     await ensureAudio();
   } catch (e) {
@@ -346,6 +467,7 @@ async function press() {
   }
   if (!held) return;
   if (!ready || !ws || ws.readyState !== WebSocket.OPEN) { held = false; return; }
+  newTurn(false);
   send({ t: "press" });
   log("press");
   sending = true;
@@ -372,15 +494,57 @@ function release() {
   }, TAIL_MS);
 }
 
-function el(tag, cls, text) {
-  const n = document.createElement(tag);
-  if (cls) n.className = cls;
-  if (text !== undefined) n.textContent = text;
-  return n;
+// ---- Typed input ----
+
+function sendText() {
+  const text = $("textIn").value.trim().slice(0, TEXT_MAX);
+  if (!text) return;
+  if (!ready || !ws || ws.readyState !== WebSocket.OPEN) {
+    toast("अभी जुड़ रहा हूँ, एक पल रुकें");
+    return;
+  }
+  $("textIn").value = "";
+  initCtx();
+  accepting = false;
+  if (player) player.stop();
+  clearTimeout(idleTimer);
+  clearTimeout(revealTimer);
+  revealTimer = 0;
+  shownWords = [];
+  queue = [];
+  newTurn(true, text);
+  send({ t: "text", text });
+  talk.classList.add("busy");
+  setStatus("सोच रहा हूँ", "think");
 }
 
-async function render() {
-  const entries = await allEntries();
+// ---- Ledger, summary, modes ----
+
+function paintMode() {
+  const kharcha = mode === "kharcha";
+  $("modeKhata").setAttribute("aria-selected", String(!kharcha));
+  $("modeKharcha").setAttribute("aria-selected", String(kharcha));
+  document.querySelectorAll("#summary .tile span").forEach((s, i) => { s.textContent = TILE_LABELS[mode][i]; });
+  $("summary").classList.toggle("kharcha", kharcha);
+  $("ledgerTitle").textContent = kharcha ? "इस महीने का खर्चा" : "खाता";
+  $("catBar").hidden = !kharcha;
+}
+
+function setMode(m) {
+  if (m === mode) return;
+  mode = m;
+  localStorage.setItem(MODE_KEY, m);
+  paintMode();
+  send({ t: "mode", mode: m });
+  render();
+}
+
+function render() {
+  return mode === "kharcha" ? renderKharcha() : renderKhata();
+}
+
+async function renderKhata() {
+  const entries = await allEntries("khata");
   const byKey = new Map();
   for (const e of entries) {
     let c = byKey.get(e.nameKey);
@@ -444,6 +608,67 @@ async function render() {
   }
 }
 
+async function renderKharcha() {
+  const entries = await allEntries("kharcha");
+  const today = todayIST();
+  const month = today.slice(0, 7);
+  let todaySum = 0;
+  let monthSum = 0;
+  const monthList = [];
+  const byCat = new Map();
+  for (const e of entries) {
+    if (e.date === today) todaySum += e.amount;
+    if (!e.date.startsWith(month)) continue;
+    monthList.push(e);
+    monthSum += e.amount;
+    const k = e.category || "other";
+    byCat.set(k, (byCat.get(k) || 0) + e.amount);
+  }
+  const cats = [...byCat].sort((a, b) => b[1] - a[1]);
+  $("sumDue").textContent = money(todaySum);
+  $("sumToday").textContent = money(monthSum);
+  $("sumCount").textContent = cats.length ? catLabel(cats[0][0]) + " " + money(cats[0][1]) : "-";
+
+  const bar = $("catBar");
+  bar.textContent = "";
+  const top = cats.slice(0, 5);
+  const max = top.length ? top[0][1] : 1;
+  for (const [k, v] of top) {
+    const fill = el("i");
+    fill.style.width = Math.max(4, Math.round((v / max) * 100)) + "%";
+    const track = el("span", "cbar");
+    track.append(fill);
+    const row = el("div", "crow");
+    row.append(el("span", "clabel", catLabel(k)), track, el("span", "camt", money(v)));
+    bar.append(row);
+  }
+
+  const ul = $("ledger");
+  ul.textContent = "";
+  if (!monthList.length) {
+    ul.append(el("li", "empty", "इस महीने अभी कोई खर्चा नहीं"));
+    return;
+  }
+  monthList.sort((a, b) => (a.date === b.date ? (a.at < b.at ? 1 : -1) : (a.date < b.date ? 1 : -1)));
+  let day = null;
+  let block = null;
+  for (const e of monthList) {
+    if (e.date !== day) {
+      day = e.date;
+      block = el("li", "dayblock");
+      block.append(el("div", "dayhead", shortDate(e.date)));
+      ul.append(block);
+    }
+    const row = el("div", "krow");
+    row.append(el("span", "kitem", e.item || ""), el("span", "kchip", catLabel(e.category)), el("span", "kamt", money(e.amount)));
+    if (e.note) row.append(el("div", "knote", e.note));
+    if (e.split && e.split.with) row.append(el("div", "ksplit", "आधा: " + e.split.with));
+    block.append(row);
+  }
+}
+
+// ---- Language picker ----
+
 function showPicker(reason) {
   $("picker").hidden = false;
   log("picker_shown", { reason });
@@ -460,14 +685,27 @@ function pickLang(code) {
 }
 
 const langBox = $("langs");
-for (const [code, label] of LANGS) {
-  const b = el("button", "", label);
-  b.type = "button";
-  b.lang = code;
-  b.onclick = () => { initCtx(); log("lang_pick", { lang: code }); pickLang(code); };
-  langBox.append(b);
+for (const [tier, title, note] of TIERS) {
+  const group = el("section", "lgroup");
+  group.append(el("h3", "ghead", title));
+  if (note) group.append(el("p", "gnote", note));
+  const grid = el("div", "lgrid");
+  for (const [code, label, t] of LANGS) {
+    if (t !== tier) continue;
+    const b = el("button", t);
+    b.type = "button";
+    b.lang = code;
+    b.append(el("span", "", label));
+    if (TIER_TAG[t]) b.append(el("span", "tag", TIER_TAG[t]));
+    b.onclick = () => { initCtx(); log("lang_pick", { lang: code }); pickLang(code); };
+    grid.append(b);
+  }
+  group.append(grid);
+  langBox.append(group);
 }
 $("langbtn").onclick = () => showPicker("tap");
+
+// ---- Input wiring ----
 
 talk.addEventListener("pointerdown", (e) => {
   e.preventDefault();
@@ -478,8 +716,19 @@ for (const t of ["pointerup", "pointercancel", "pointerleave", "lostpointercaptu
 talk.addEventListener("contextmenu", (e) => e.preventDefault());
 talk.addEventListener("selectstart", (e) => e.preventDefault());
 
+$("textIn").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.isComposing) {
+    e.preventDefault();
+    sendText();
+  }
+});
+$("send").onclick = sendText;
+
+$("modeKhata").onclick = () => setMode("khata");
+$("modeKharcha").onclick = () => setMode("kharcha");
+
 addEventListener("keydown", (e) => {
-  if (e.code !== "Space" || e.repeat || !$("picker").hidden) return;
+  if (e.code !== "Space" || e.repeat || !$("picker").hidden || e.target instanceof HTMLInputElement) return;
   e.preventDefault();
   press();
 });
@@ -513,7 +762,10 @@ $("sheetOn").onchange = () => {
   log("sheet_toggle", { on: sheetOn });
 };
 
+// ---- Start ----
+
 setStatus("...");
+paintMode();
 render();
 log("page_load", { standalone: matchMedia("(display-mode: standalone)").matches, w: innerWidth });
 if (lang) {

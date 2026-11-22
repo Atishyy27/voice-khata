@@ -55,6 +55,7 @@ function seedEntries() {
     const at = new Date(now.getTime() - ago * 86400000 - i * 60000);
     return {
       id: `seed-${i + 1}`,
+      book: "khata",
       name,
       nameKey: name.toLowerCase(),
       amount,
@@ -74,10 +75,13 @@ async function seedIfEmpty(db) {
   await done(tx);
 }
 
-export async function allEntries() {
+// book: "khata" (shop credit) or "kharcha" (household). An entry without a book is khata.
+// No argument returns every entry.
+export async function allEntries(book) {
   const db = await openDb();
   await seedIfEmpty(db);
-  return wrap(db.transaction(STORE).objectStore(STORE).getAll());
+  const all = await wrap(db.transaction(STORE).objectStore(STORE).getAll());
+  return book ? all.filter((e) => (e.book || "khata") === book) : all;
 }
 
 export async function applyOps(ops) {

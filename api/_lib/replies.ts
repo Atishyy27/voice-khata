@@ -1,6 +1,8 @@
 // None of these ten packs has been checked by a native speaker yet. hi-IN, en-IN and kn-IN were run end to end;
 // the other seven (ta, te, ml, mr, bn, gu, pa) need a native speaker's check before a judge or shopkeeper hears them.
-import type { Reply } from "./types";
+// The kh_* strings (kharcha household mode) are unreviewed in all ten packs and in the machine packs (packs.json).
+import type { KharchaReply, Reply } from "./types";
+import machinePacks from "./packs.json";
 
 interface Pack {
   greeting: string;
@@ -21,9 +23,31 @@ interface Pack {
   nothing: string;
   today: string;
   help: string;
+  kh_item: string;
+  kh_split: string;
+  kh_added_total: string;
+  kh_corrected: string;
+  kh_today: string;
+  kh_month: string;
+  kh_category: string;
+  kh_nothing: string;
+  kh_help: string;
+  "kh_cat_khana": string;
+  "kh_cat_rashan": string;
+  "kh_cat_doodh-sabzi": string;
+  "kh_cat_ghar": string;
+  "kh_cat_bijli-paani": string;
+  "kh_cat_phone-recharge": string;
+  "kh_cat_safar": string;
+  "kh_cat_dawai": string;
+  "kh_cat_padhai": string;
+  "kh_cat_kapde": string;
+  "kh_cat_tyohar": string;
+  "kh_cat_udhaar-diya": string;
+  "kh_cat_other": string;
 }
 
-const PACKS: Record<string, Pack> = {
+export const PACKS: Record<string, Pack> = {
   "hi-IN": {
     greeting: "नमस्ते! मैं एक AI खाता सहायक हूँ। बटन दबाकर बोलिए, जैसे रमेश का तीन सौ चालीस उधार।",
     cr: "{name} का {amt} उधार लिखा।",
@@ -43,6 +67,28 @@ const PACKS: Record<string, Pack> = {
     nothing: "ठीक करने के लिए कोई एंट्री नहीं है।",
     today: "आज {amt} उधार गया, {count} एंट्री।",
     help: "समझ नहीं आया। ऐसे बोलिए: रमेश का तीन सौ चालीस उधार।",
+    kh_item: "{item} {amt}।",
+    kh_split: "{item} {amt}, आपका हिस्सा {mine}, {with} से {other} लेने हैं।",
+    kh_added_total: "आज का कुल खर्च {amt}।",
+    kh_corrected: "ठीक किया। {item} {amt}। आज का कुल खर्च {total}।",
+    kh_today: "आज {amt} खर्च हुआ, {count} चीज़ें।",
+    kh_month: "इस महीने {amt} खर्च हुआ, {count} चीज़ें।",
+    kh_category: "इस महीने {category} पर {amt} खर्च हुआ।",
+    kh_nothing: "ठीक करने के लिए कोई खर्च नहीं है।",
+    kh_help: "समझ नहीं आया। ऐसे बोलिए: चाय बीस, ऑटो पचास।",
+    "kh_cat_khana": "खाना-पीना",
+    "kh_cat_rashan": "राशन",
+    "kh_cat_doodh-sabzi": "दूध-सब्ज़ी",
+    "kh_cat_ghar": "घर",
+    "kh_cat_bijli-paani": "बिजली-पानी",
+    "kh_cat_phone-recharge": "फ़ोन रिचार्ज",
+    "kh_cat_safar": "सफ़र",
+    "kh_cat_dawai": "दवाई",
+    "kh_cat_padhai": "पढ़ाई",
+    "kh_cat_kapde": "कपड़े",
+    "kh_cat_tyohar": "त्योहार",
+    "kh_cat_udhaar-diya": "उधार दिया",
+    "kh_cat_other": "बाकी खर्च",
   },
   "en-IN": {
     greeting: "Hello! I am an AI khata assistant. Hold the button and speak, for example: Ramesh, three hundred forty udhaar.",
@@ -63,6 +109,28 @@ const PACKS: Record<string, Pack> = {
     nothing: "There is no entry to fix.",
     today: "Today {amt} udhaar given, {count} entries.",
     help: "Sorry, I did not catch that. Try: Ramesh, three hundred forty udhaar.",
+    kh_item: "{item} {amt}.",
+    kh_split: "{item} {amt}, your share {mine}, {with} owes {other}.",
+    kh_added_total: "Today's spend {amt}.",
+    kh_corrected: "Fixed. {item} {amt}. Today's spend {total}.",
+    kh_today: "Today {amt} spent, {count} items.",
+    kh_month: "This month {amt} spent, {count} items.",
+    kh_category: "This month, on {category}: {amt}.",
+    kh_nothing: "There is no expense to fix.",
+    kh_help: "Sorry, I did not catch that. Try: tea 20, auto 50.",
+    "kh_cat_khana": "Food",
+    "kh_cat_rashan": "Groceries",
+    "kh_cat_doodh-sabzi": "Milk and vegetables",
+    "kh_cat_ghar": "Home",
+    "kh_cat_bijli-paani": "Electricity and water",
+    "kh_cat_phone-recharge": "Phone recharge",
+    "kh_cat_safar": "Travel",
+    "kh_cat_dawai": "Medicine",
+    "kh_cat_padhai": "Studies",
+    "kh_cat_kapde": "Clothes",
+    "kh_cat_tyohar": "Festivals",
+    "kh_cat_udhaar-diya": "Money lent",
+    "kh_cat_other": "Other",
   },
   "kn-IN": {
     greeting: "ನಮಸ್ಕಾರ! ನಾನು AI ಖಾತಾ ಸಹಾಯಕ. ಬಟನ್ ಒತ್ತಿ ಮಾತನಾಡಿ, ಉದಾಹರಣೆಗೆ: ರಮೇಶ್ ಮುನ್ನೂರ ನಲವತ್ತು ಉದ್ರಿ.",
@@ -83,6 +151,28 @@ const PACKS: Record<string, Pack> = {
     nothing: "ಸರಿಪಡಿಸಲು ಯಾವ ಎಂಟ್ರಿಯೂ ಇಲ್ಲ.",
     today: "ಇಂದು {amt} ಉದ್ರಿ ಕೊಟ್ಟಿದೆ, {count} ಎಂಟ್ರಿ.",
     help: "ಅರ್ಥವಾಗಲಿಲ್ಲ. ಹೀಗೆ ಹೇಳಿ: ರಮೇಶ್ ಮುನ್ನೂರ ನಲವತ್ತು ಉದ್ರಿ.",
+    kh_item: "{item} {amt}.",
+    kh_split: "{item} {amt}, ನಿಮ್ಮ ಪಾಲು {mine}, {with} ಇಂದ {other} ಬರಬೇಕು.",
+    kh_added_total: "ಇಂದಿನ ಒಟ್ಟು ಖರ್ಚು {amt}.",
+    kh_corrected: "ಸರಿಪಡಿಸಿದೆ. {item} {amt}. ಇಂದಿನ ಒಟ್ಟು ಖರ್ಚು {total}.",
+    kh_today: "ಇಂದು {amt} ಖರ್ಚಾಯಿತು, {count} ವಸ್ತುಗಳು.",
+    kh_month: "ಈ ತಿಂಗಳು {amt} ಖರ್ಚಾಯಿತು, {count} ವಸ್ತುಗಳು.",
+    kh_category: "ಈ ತಿಂಗಳು {category} ಮೇಲೆ {amt} ಖರ್ಚಾಯಿತು.",
+    kh_nothing: "ಸರಿಪಡಿಸಲು ಯಾವ ಖರ್ಚೂ ಇಲ್ಲ.",
+    kh_help: "ಅರ್ಥವಾಗಲಿಲ್ಲ. ಹೀಗೆ ಹೇಳಿ: ಚಹಾ ಇಪ್ಪತ್ತು, ಆಟೋ ಐವತ್ತು.",
+    "kh_cat_khana": "ಊಟ-ತಿಂಡಿ",
+    "kh_cat_rashan": "ರೇಷನ್",
+    "kh_cat_doodh-sabzi": "ಹಾಲು-ತರಕಾರಿ",
+    "kh_cat_ghar": "ಮನೆ",
+    "kh_cat_bijli-paani": "ಕರೆಂಟ್-ನೀರು",
+    "kh_cat_phone-recharge": "ಫೋನ್ ರೀಚಾರ್ಜ್",
+    "kh_cat_safar": "ಪ್ರಯಾಣ",
+    "kh_cat_dawai": "ಔಷಧಿ",
+    "kh_cat_padhai": "ಓದು",
+    "kh_cat_kapde": "ಬಟ್ಟೆ",
+    "kh_cat_tyohar": "ಹಬ್ಬ",
+    "kh_cat_udhaar-diya": "ಕೊಟ್ಟ ಸಾಲ",
+    "kh_cat_other": "ಇತರೆ",
   },
   "ta-IN": {
     greeting: "வணக்கம்! நான் ஒரு AI கணக்கு உதவியாளர். பட்டனை அழுத்திப் பேசுங்கள், உதாரணம்: ரமேஷ் முந்நூற்று நாற்பது கடன்.",
@@ -103,6 +193,28 @@ const PACKS: Record<string, Pack> = {
     nothing: "திருத்த எந்த பதிவும் இல்லை.",
     today: "இன்று {amt} கடன் கொடுக்கப்பட்டது, {count} பதிவுகள்.",
     help: "புரியவில்லை. இப்படிச் சொல்லுங்கள்: ரமேஷ் முந்நூற்று நாற்பது கடன்.",
+    kh_item: "{item} {amt}.",
+    kh_split: "{item} {amt}, உங்கள் பங்கு {mine}, {with} தர வேண்டியது {other}.",
+    kh_added_total: "இன்றைய மொத்த செலவு {amt}.",
+    kh_corrected: "திருத்தினேன். {item} {amt}. இன்றைய மொத்த செலவு {total}.",
+    kh_today: "இன்று {amt} செலவானது, {count} பொருட்கள்.",
+    kh_month: "இந்த மாதம் {amt} செலவானது, {count} பொருட்கள்.",
+    kh_category: "இந்த மாதம் {category} மீது {amt} செலவானது.",
+    kh_nothing: "திருத்த எந்த செலவும் இல்லை.",
+    kh_help: "புரியவில்லை. இப்படிச் சொல்லுங்கள்: டீ இருபது, ஆட்டோ ஐம்பது.",
+    "kh_cat_khana": "உணவு",
+    "kh_cat_rashan": "மளிகை",
+    "kh_cat_doodh-sabzi": "பால்-காய்கறி",
+    "kh_cat_ghar": "வீடு",
+    "kh_cat_bijli-paani": "மின்சாரம்-தண்ணீர்",
+    "kh_cat_phone-recharge": "போன் ரீசார்ஜ்",
+    "kh_cat_safar": "பயணம்",
+    "kh_cat_dawai": "மருந்து",
+    "kh_cat_padhai": "படிப்பு",
+    "kh_cat_kapde": "துணி",
+    "kh_cat_tyohar": "பண்டிகை",
+    "kh_cat_udhaar-diya": "கொடுத்த கடன்",
+    "kh_cat_other": "மற்றவை",
   },
   "te-IN": {
     greeting: "నమస్కారం! నేను ఒక AI ఖాతా సహాయకుడిని. బటన్ నొక్కి మాట్లాడండి, ఉదాహరణకు: రమేష్ మూడు వందల నలభై అప్పు.",
@@ -123,6 +235,28 @@ const PACKS: Record<string, Pack> = {
     nothing: "సరిచేయడానికి ఎంట్రీ ఏదీ లేదు.",
     today: "ఈ రోజు {amt} అప్పు ఇచ్చారు, {count} ఎంట్రీలు.",
     help: "అర్థం కాలేదు. ఇలా చెప్పండి: రమేష్ మూడు వందల నలభై అప్పు.",
+    kh_item: "{item} {amt}.",
+    kh_split: "{item} {amt}, మీ వాటా {mine}, {with} నుండి {other} రావాలి.",
+    kh_added_total: "ఈ రోజు మొత్తం ఖర్చు {amt}.",
+    kh_corrected: "సరిచేశాను. {item} {amt}. ఈ రోజు మొత్తం ఖర్చు {total}.",
+    kh_today: "ఈ రోజు {amt} ఖర్చయింది, {count} వస్తువులు.",
+    kh_month: "ఈ నెల {amt} ఖర్చయింది, {count} వస్తువులు.",
+    kh_category: "ఈ నెల {category} మీద {amt} ఖర్చయింది.",
+    kh_nothing: "సరిచేయడానికి ఖర్చు ఏదీ లేదు.",
+    kh_help: "అర్థం కాలేదు. ఇలా చెప్పండి: టీ ఇరవై, ఆటో యాభై.",
+    "kh_cat_khana": "తిండి",
+    "kh_cat_rashan": "సరుకులు",
+    "kh_cat_doodh-sabzi": "పాలు-కూరగాయలు",
+    "kh_cat_ghar": "ఇల్లు",
+    "kh_cat_bijli-paani": "కరెంటు-నీళ్లు",
+    "kh_cat_phone-recharge": "ఫోన్ రీఛార్జ్",
+    "kh_cat_safar": "ప్రయాణం",
+    "kh_cat_dawai": "మందులు",
+    "kh_cat_padhai": "చదువు",
+    "kh_cat_kapde": "బట్టలు",
+    "kh_cat_tyohar": "పండుగ",
+    "kh_cat_udhaar-diya": "ఇచ్చిన అప్పు",
+    "kh_cat_other": "ఇతరం",
   },
   "ml-IN": {
     greeting: "നമസ്കാരം! ഞാൻ ഒരു AI കണക്ക് സഹായിയാണ്. ബട്ടൺ അമർത്തി സംസാരിക്കൂ, ഉദാഹരണത്തിന്: രമേഷ് മുന്നൂറ്റി നാൽപ്പത് കടം.",
@@ -143,6 +277,28 @@ const PACKS: Record<string, Pack> = {
     nothing: "തിരുത്താൻ എൻട്രി ഒന്നുമില്ല.",
     today: "ഇന്ന് {amt} കടം നൽകി, {count} എൻട്രികൾ.",
     help: "മനസ്സിലായില്ല. ഇങ്ങനെ പറയൂ: രമേഷ് മുന്നൂറ്റി നാൽപ്പത് കടം.",
+    kh_item: "{item} {amt}.",
+    kh_split: "{item} {amt}, നിങ്ങളുടെ വിഹിതം {mine}, {with} ൽ നിന്ന് {other} കിട്ടാനുണ്ട്.",
+    kh_added_total: "ഇന്നത്തെ ആകെ ചെലവ് {amt}.",
+    kh_corrected: "തിരുത്തി. {item} {amt}. ഇന്നത്തെ ആകെ ചെലവ് {total}.",
+    kh_today: "ഇന്ന് {amt} ചെലവായി, {count} സാധനങ്ങൾ.",
+    kh_month: "ഈ മാസം {amt} ചെലവായി, {count} സാധനങ്ങൾ.",
+    kh_category: "ഈ മാസം {category} ൽ {amt} ചെലവായി.",
+    kh_nothing: "തിരുത്താൻ ചെലവൊന്നുമില്ല.",
+    kh_help: "മനസ്സിലായില്ല. ഇങ്ങനെ പറയൂ: ചായ ഇരുപത്, ഓട്ടോ അമ്പത്.",
+    "kh_cat_khana": "ഭക്ഷണം",
+    "kh_cat_rashan": "റേഷൻ",
+    "kh_cat_doodh-sabzi": "പാൽ-പച്ചക്കറി",
+    "kh_cat_ghar": "വീട്",
+    "kh_cat_bijli-paani": "കറന്റ്-വെള്ളം",
+    "kh_cat_phone-recharge": "ഫോൺ റീചാർജ്",
+    "kh_cat_safar": "യാത്ര",
+    "kh_cat_dawai": "മരുന്ന്",
+    "kh_cat_padhai": "പഠനം",
+    "kh_cat_kapde": "വസ്ത്രം",
+    "kh_cat_tyohar": "ആഘോഷം",
+    "kh_cat_udhaar-diya": "കൊടുത്ത കടം",
+    "kh_cat_other": "മറ്റുള്ളവ",
   },
   "mr-IN": {
     greeting: "नमस्कार! मी एक AI खाते सहाय्यक आहे. बटण दाबून बोला, उदाहरणार्थ: रमेश यांचे तीनशे चाळीस उधार.",
@@ -163,6 +319,28 @@ const PACKS: Record<string, Pack> = {
     nothing: "दुरुस्त करण्यासाठी कोणतीही एंट्री नाही.",
     today: "आज {amt} उधार दिले, {count} एंट्री.",
     help: "समजले नाही. असे बोला: रमेश यांचे तीनशे चाळीस उधार.",
+    kh_item: "{item} {amt}.",
+    kh_split: "{item} {amt}, तुमचा वाटा {mine}, {with} कडून {other} घ्यायचे आहेत.",
+    kh_added_total: "आजचा एकूण खर्च {amt}.",
+    kh_corrected: "दुरुस्त केले. {item} {amt}. आजचा एकूण खर्च {total}.",
+    kh_today: "आज {amt} खर्च झाला, {count} वस्तू.",
+    kh_month: "या महिन्यात {amt} खर्च झाला, {count} वस्तू.",
+    kh_category: "या महिन्यात {category} वर {amt} खर्च झाला.",
+    kh_nothing: "दुरुस्त करण्यासारखा खर्च नाही.",
+    kh_help: "समजले नाही. असे बोला: चहा वीस, रिक्षा पन्नास.",
+    "kh_cat_khana": "खाणे-पिणे",
+    "kh_cat_rashan": "रेशन",
+    "kh_cat_doodh-sabzi": "दूध-भाजी",
+    "kh_cat_ghar": "घर",
+    "kh_cat_bijli-paani": "वीज-पाणी",
+    "kh_cat_phone-recharge": "फोन रिचार्ज",
+    "kh_cat_safar": "प्रवास",
+    "kh_cat_dawai": "औषध",
+    "kh_cat_padhai": "शिक्षण",
+    "kh_cat_kapde": "कपडे",
+    "kh_cat_tyohar": "सण",
+    "kh_cat_udhaar-diya": "दिलेले उधार",
+    "kh_cat_other": "इतर",
   },
   "bn-IN": {
     greeting: "নমস্কার! আমি একটি AI খাতা সহকারী। বোতাম চেপে বলুন, যেমন: রমেশের তিনশো চল্লিশ টাকা বাকি।",
@@ -183,6 +361,28 @@ const PACKS: Record<string, Pack> = {
     nothing: "ঠিক করার মতো কোনো এন্ট্রি নেই।",
     today: "আজ {amt} বাকি দেওয়া হয়েছে, {count}টি এন্ট্রি।",
     help: "বুঝতে পারিনি। এভাবে বলুন: রমেশের তিনশো চল্লিশ টাকা বাকি।",
+    kh_item: "{item} {amt}।",
+    kh_split: "{item} {amt}, আপনার ভাগ {mine}, {with} এর কাছ থেকে {other} পাবেন।",
+    kh_added_total: "আজকের মোট খরচ {amt}।",
+    kh_corrected: "ঠিক করলাম। {item} {amt}। আজকের মোট খরচ {total}।",
+    kh_today: "আজ {amt} খরচ হয়েছে, {count}টি জিনিস।",
+    kh_month: "এই মাসে {amt} খরচ হয়েছে, {count}টি জিনিস।",
+    kh_category: "এই মাসে {category}-এ {amt} খরচ হয়েছে।",
+    kh_nothing: "ঠিক করার মতো কোনো খরচ নেই।",
+    kh_help: "বুঝতে পারিনি। এভাবে বলুন: চা কুড়ি, অটো পঞ্চাশ।",
+    "kh_cat_khana": "খাওয়া-দাওয়া",
+    "kh_cat_rashan": "রেশন",
+    "kh_cat_doodh-sabzi": "দুধ-সবজি",
+    "kh_cat_ghar": "বাড়ি",
+    "kh_cat_bijli-paani": "বিদ্যুৎ-জল",
+    "kh_cat_phone-recharge": "ফোন রিচার্জ",
+    "kh_cat_safar": "যাতায়াত",
+    "kh_cat_dawai": "ওষুধ",
+    "kh_cat_padhai": "পড়াশোনা",
+    "kh_cat_kapde": "জামাকাপড়",
+    "kh_cat_tyohar": "উৎসব",
+    "kh_cat_udhaar-diya": "দেওয়া ধার",
+    "kh_cat_other": "অন্যান্য",
   },
   "gu-IN": {
     greeting: "નમસ્તે! હું એક AI ખાતા સહાયક છું. બટન દબાવીને બોલો, જેમ કે: રમેશના ત્રણસો ચાળીસ ઉધાર.",
@@ -203,6 +403,28 @@ const PACKS: Record<string, Pack> = {
     nothing: "સુધારવા માટે કોઈ એન્ટ્રી નથી.",
     today: "આજે {amt} ઉધાર ગયા, {count} એન્ટ્રી.",
     help: "સમજાયું નહીં. આમ બોલો: રમેશના ત્રણસો ચાળીસ ઉધાર.",
+    kh_item: "{item} {amt}.",
+    kh_split: "{item} {amt}, ਤੁਹਾਡਾ ਹਿੱਸਾ {mine}, {with} ਤੋਂ {other} ਲੈਣੇ ਹਨ।",
+    kh_added_total: "ਅੱਜ ਦਾ ਕੁੱਲ ਖਰਚ {amt}।",
+    kh_corrected: "ਠੀਕ ਕਰ ਦਿੱਤਾ। {item} {amt}। ਅੱਜ ਦਾ ਕੁੱਲ ਖਰਚ {total}।",
+    kh_today: "ਅੱਜ {amt} ਖਰਚ ਹੋਇਆ, {count} ਚੀਜ਼ਾਂ।",
+    kh_month: "ਇਸ ਮਹੀਨੇ {amt} ਖਰਚ ਹੋਇਆ, {count} ਚੀਜ਼ਾਂ।",
+    kh_category: "ਇਸ ਮਹੀਨੇ {category} ਤੇ {amt} ਖਰਚ ਹੋਇਆ।",
+    kh_nothing: "ਠੀਕ ਕਰਨ ਲਈ ਕੋਈ ਖਰਚ ਨਹੀਂ ਹੈ।",
+    kh_help: "ਸਮਝ ਨਹੀਂ ਆਇਆ। ਇੰਝ ਬੋਲੋ: ਚਾਹ ਵੀਹ, ਆਟੋ ਪੰਜਾਹ।",
+    "kh_cat_khana": "ਖਾਣਾ-ਪੀਣਾ",
+    "kh_cat_rashan": "ਰਾਸ਼ਨ",
+    "kh_cat_doodh-sabzi": "ਦੁੱਧ-ਸਬਜ਼ੀ",
+    "kh_cat_ghar": "ਘਰ",
+    "kh_cat_bijli-paani": "ਬਿਜਲੀ-ਪਾਣੀ",
+    "kh_cat_phone-recharge": "ਫ਼ੋਨ ਰੀਚਾਰਜ",
+    "kh_cat_safar": "ਸਫ਼ਰ",
+    "kh_cat_dawai": "ਦਵਾਈ",
+    "kh_cat_padhai": "ਪੜ੍ਹਾਈ",
+    "kh_cat_kapde": "ਕੱਪੜੇ",
+    "kh_cat_tyohar": "ਤਿਓਹਾਰ",
+    "kh_cat_udhaar-diya": "ਦਿੱਤਾ ਉਧਾਰ",
+    "kh_cat_other": "ਹੋਰ",
   },
   "pa-IN": {
     greeting: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਇੱਕ AI ਖਾਤਾ ਸਹਾਇਕ ਹਾਂ। ਬਟਨ ਦਬਾ ਕੇ ਬੋਲੋ, ਜਿਵੇਂ: ਰਮੇਸ਼ ਦਾ ਤਿੰਨ ਸੌ ਚਾਲੀ ਉਧਾਰ।",
@@ -223,10 +445,36 @@ const PACKS: Record<string, Pack> = {
     nothing: "ਠੀਕ ਕਰਨ ਲਈ ਕੋਈ ਐਂਟਰੀ ਨਹੀਂ ਹੈ।",
     today: "ਅੱਜ {amt} ਉਧਾਰ ਗਿਆ, {count} ਐਂਟਰੀਆਂ।",
     help: "ਸਮਝ ਨਹੀਂ ਆਇਆ। ਇੰਝ ਬੋਲੋ: ਰਮੇਸ਼ ਦਾ ਤਿੰਨ ਸੌ ਚਾਲੀ ਉਧਾਰ।",
+    kh_item: "{item} {amt}.",
+    kh_split: "{item} {amt}, તમારો ભાગ {mine}, {with} પાસેથી {other} લેવાના છે.",
+    kh_added_total: "આજનો કુલ ખર્ચ {amt}.",
+    kh_corrected: "સુધાર્યું. {item} {amt}. આજનો કુલ ખર્ચ {total}.",
+    kh_today: "આજે {amt} ખર્ચ થયો, {count} વસ્તુ.",
+    kh_month: "આ મહિને {amt} ખર્ચ થયો, {count} વસ્તુ.",
+    kh_category: "આ મહિને {category} પર {amt} ખર્ચ થયો.",
+    kh_nothing: "સુધારવા માટે કોઈ ખર્ચ નથી.",
+    kh_help: "સમજાયું નહીં. આમ બોલો: ચા વીસ, ઓટો પચાસ.",
+    "kh_cat_khana": "ખાવાપીવાનું",
+    "kh_cat_rashan": "રાશન",
+    "kh_cat_doodh-sabzi": "દૂધ-શાક",
+    "kh_cat_ghar": "ઘર",
+    "kh_cat_bijli-paani": "વીજળી-પાણી",
+    "kh_cat_phone-recharge": "ફોન રિચાર્જ",
+    "kh_cat_safar": "મુસાફરી",
+    "kh_cat_dawai": "દવા",
+    "kh_cat_padhai": "ભણતર",
+    "kh_cat_kapde": "કપડાં",
+    "kh_cat_tyohar": "તહેવાર",
+    "kh_cat_udhaar-diya": "આપેલી ઉધાર",
+    "kh_cat_other": "બીજું",
   },
 };
 
-const pack = (lang: string): Pack => PACKS[lang] ?? PACKS["hi-IN"];
+// A machine pack missing any key (a failed translation) falls back to hi-IN for that key.
+const pack = (lang: string): Pack => {
+  const own: Partial<Pack> | undefined = PACKS[lang] ?? (machinePacks as unknown as Record<string, Partial<Pack>>)[lang];
+  return own ? { ...PACKS["hi-IN"], ...own } : PACKS["hi-IN"];
+};
 
 // Indian grouping: 1,25,000
 export function money(n: number): string {
@@ -250,9 +498,39 @@ function balancePhrase(p: Pack, name: string | null, bal: number): string {
       : fill(p.totalNeg, { name, amt });
 }
 
-export function say(reply: Reply, lang: string): string {
+export function say(reply: Reply | KharchaReply, lang: string): string {
   const p = pack(lang);
   switch (reply.key) {
+    case "kh_added": {
+      const lines = reply.items.map((it) =>
+        it.with !== undefined && it.myShare !== undefined
+          ? fill(p.kh_split, {
+              item: it.item,
+              amt: money(it.amount),
+              mine: money(it.myShare),
+              with: it.with,
+              other: money(it.amount - it.myShare),
+            })
+          : fill(p.kh_item, { item: it.item, amt: money(it.amount) }),
+      );
+      lines.push(fill(p.kh_added_total, { amt: money(reply.todayTotal) }));
+      return lines.join(" ");
+    }
+    case "kh_corrected":
+      return fill(p.kh_corrected, { item: reply.item, amt: money(reply.amount), total: money(reply.todayTotal) });
+    case "kh_today":
+      return fill(p.kh_today, { amt: money(reply.amount), count: reply.count });
+    case "kh_month":
+      return fill(p.kh_month, { amt: money(reply.amount), count: reply.count });
+    case "kh_category":
+      return fill(p.kh_category, {
+        category: (p as unknown as Record<string, string>)[`kh_cat_${reply.category}`] ?? p["kh_cat_other"],
+        amt: money(reply.amount),
+      });
+    case "kh_nothing":
+      return p.kh_nothing;
+    case "kh_help":
+      return p.kh_help;
     case "added": {
       const lines = reply.items.map((it) =>
         fill(it.direction === "credit" ? p.cr : p.pay, { name: it.name, amt: money(it.amount) }),
