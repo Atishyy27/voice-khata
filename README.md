@@ -19,6 +19,9 @@ space bar)
 | अनिल का पाँच सौ उधार, कल दो सौ दिया था | two entries: ₹500 udhaar today, ₹200 jama dated yesterday |
 | ರಮೇಶ್ ಶರ್ಮಾ ಅವರಿಗೆ ಮುನ್ನೂರ ನಲವತ್ತು ರೂಪಾಯಿ ಸಾಲ ಬರೆಯಿರಿ | same flow in Kannada; English works too. The other seven Timbre languages have reply text but have not been run end to end |
 
+Say why, and it keeps a short note with the entry: "Mohan ka 800 udhaar, cheeni aur chawal ka" stores the note
+"cheeni aur chawal ka" next to the ₹800.
+
 When you pick a language it greets you and says it is an AI, in that language. If that greeting is cut off or
 never plays, the next reply starts with the AI line instead; it counts as said only once a reply carrying it plays
 to the end. Switching language owes the disclosure again.
@@ -52,6 +55,18 @@ flowchart LR
    amount is used if the LLM wrote a different one (`crossCheck` in `api/_lib/session.ts`).
 5. The reply streams back from Timbre in chunks and plays as it arrives. Pressing the button again stops it
    (barge-in) and the server drops the rest of that reply.
+
+## Demo Google Sheet (opt-in, off by default)
+
+A toggle under the khata, "डेमो शीट में भी लिखें (ये शीट सब देख सकते हैं)", also appends each entry to one public demo
+Google Sheet. It is off by default, so the khata stays on the phone unless you switch it on. The sheet is append-only:
+a correction adds a reversal row and the corrected row, and nothing is ever edited. Four tabs are formulas over the
+Entries tab: Receivables (what each customer owes and how old it is), Aging (0-30, 31-60, 60+ days), Top dues
+(the few customers holding most of the money, 80/20) and Trends (daily udhaar vs jama, collection rate, chart).
+
+How it is wired: the server posts new rows to a small Apps Script web app (`sheet/hook.gs`) owned by the sheet's
+account; its URL stays in a server environment variable. `setup()` in that file builds the whole sheet once. The
+toggle only appears after the hook reports the sheet's link.
 
 ## Gnani API Platform services used
 
@@ -97,7 +112,7 @@ These are small synthetic runs, not field data. Real shop noise and real voices 
 | Rule | What we do |
 |---|---|
 | AI disclosure | The greeting says it is an AI in the chosen language; until a turn carrying that line has played to the end, every reply starts with it (`greeting()` in `api/_lib/replies.ts`, `reply()` and `disclosure()` in `api/_lib/session.ts`) |
-| Data | The seeded khata is synthetic (`resetDemo()` in `public/store.js`); entries you speak are saved only in that phone's IndexedDB. The server holds the ledger in memory while the socket is open and writes no transcript, ledger or audio to disk or a database. Audio, transcripts and customer names go to Gnani and Groq for processing. Server logs hold timings, the intent kind, the reply key and the model name; error lines can include an upstream error message. Vercel keeps function logs under its own policy |
+| Data | The seeded khata is synthetic (`resetDemo()` in `public/store.js`); entries you speak are saved only in that phone's IndexedDB. The server holds the ledger in memory while the socket is open and writes no transcript, ledger or audio to disk or a database. Audio, transcripts and customer names go to Gnani and Groq for processing. Server logs hold timings, the intent kind, the reply key and the model name; error lines can include an upstream error message. Vercel keeps function logs under its own policy. With the demo-sheet toggle on (off by default), entries are also appended to a public demo Google Sheet, and the page says so next to the toggle |
 | Money | Records credit and payments only. Replies confirm entries and state balances. No lending, and no reminders are sent to anyone |
 | Secrets | Keys live in `.env.local` (git-ignored) and Vercel environment variables. The browser never sees a key: browsers cannot set WebSocket headers, so the server relays |
 | Voices | Stock Timbre voice only. No cloning |
@@ -125,6 +140,7 @@ Mumbai region and the function's 300 s limit; the page reconnects when a socket 
 | `api/_lib/stt.ts`, `api/_lib/tts.ts` | Prisma and Timbre socket wrappers |
 | `api/_lib/parse.ts` | utterance to intent JSON |
 | `api/_lib/ledger.ts`, `api/_lib/numbers.ts`, `api/_lib/replies.ts` | khata maths, amount reading, reply text (written for 10 languages, run in 3) |
+| `api/_lib/sheet.ts`, `sheet/hook.gs` | opt-in demo sheet: rows to append (with reversal rows), the Apps Script that appends them and builds the sheet |
 | `public/` | the page: `app.js`, `worklet.js` (mic to 16 kHz frames), `player.js` (gapless playback), `store.js` (IndexedDB) |
 | `scripts/` | `dev.ts` local server, `spike.mjs` speech test, `e2e.mjs` end-to-end test, `probe-headers.mjs` language-list check |
 

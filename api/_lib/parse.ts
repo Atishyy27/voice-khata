@@ -11,7 +11,7 @@ const RULES = `You turn one utterance from an Indian kirana shopkeeper into JSON
 The utterance can be in any Indian language mixed with English. Reply with one JSON object only.
 
 {"kind": "add"|"correct"|"query_total"|"query_today"|"clarify_answer"|"other",
- "entries": [{"name": string, "nameKey": string, "amount": number, "direction": "credit"|"payment", "dayOffset": number}],
+ "entries": [{"name": string, "nameKey": string, "amount": number, "direction": "credit"|"payment", "dayOffset": number, "note": string}],
  "fix": {"amount"?: number, "name"?: string, "nameKey"?: string, "direction"?: "credit"|"payment"},
  "name": string, "nameKey": string}
 
@@ -28,6 +28,7 @@ kind:
 
 amount: whole rupees as a number, read exactly as said. Never add or change digits.
 dayOffset: 0 = today. kal with past tense (diya tha, gaya tha, liya tha) = -1. parso = -2. Unsure = 0.
+note: a short summary (max 80 characters) of the reason or story given for that entry, in the words and script spoken ("shaadi ke liye kapda", "cheeni, chawal"). "" if none. Never put the amount or name in the note.
 name: the customer name as spoken. nameKey: the same name in lowercase Latin letters (ramesh, sita).
 If the spoken name is clearly one existing customer, use that customer's nameKey exactly. If it could be several
 (only a first name was said), use just the first name as nameKey. Never invent a surname.`;
@@ -133,7 +134,8 @@ export function toIntent(raw: any): Intent {
       const k = key(e?.nameKey || e?.name);
       if (!a || !d || !k) continue;
       const off = Number(e?.dayOffset);
-      entries.push({ name: String(e.name || e.nameKey), nameKey: k, amount: a, direction: d, dayOffset: Number.isFinite(off) ? Math.max(-7, Math.min(0, Math.round(off))) : 0 });
+      const note = String(e?.note ?? "").trim().slice(0, 80);
+      entries.push({ name: String(e.name || e.nameKey), nameKey: k, amount: a, direction: d, dayOffset: Number.isFinite(off) ? Math.max(-7, Math.min(0, Math.round(off))) : 0, ...(note ? { note } : {}) });
     }
     if (!entries.length) return { kind: "other" };
     intent.entries = entries;

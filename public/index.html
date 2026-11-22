@@ -31,7 +31,8 @@
   .row { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 56px; padding: 8px 12px; background: #fff; border: 0; font: inherit; color: inherit; text-align: left; }
   .row b { font-size: 20px; font-variant-numeric: tabular-nums; }
   .entries { padding: 0 12px 8px; background: #f6f6f6; }
-  .entries div { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid #ddd; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .entries div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid #ddd; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .entries .note { flex-basis: 100%; color:#666; font-size:14px; }
   .cr { color: #9a0000; }
   .pm { color: #0b5a0b; }
   .link { background: none; border: 0; padding: 10px 4px; font-size: 15px; font-family: inherit; color: #0a3fa0; text-decoration: underline; cursor: pointer; min-height: 44px; }
@@ -40,6 +41,7 @@
   #langs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 480px; margin: 0 auto; }
   #langs button { min-height: 72px; font-weight: 700; font-size: 22px; font-family: inherit; border: 2px solid #0a58d6; border-radius: 12px; background: #fff; color: #0a3fa0; }
   #langs button:active { background: #dbe8ff; }
+  .sheet { font-size: 15px; color: #444; } .sheet a { margin-left: 8px; } #sheetMsg { margin-left: 8px; color: #2a7; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -59,6 +61,7 @@
   </div>
 
   <ul id="ledger"></ul>
+  <p class="sheet" id="sheetBox" hidden><label><input type="checkbox" id="sheetOn"> डेमो शीट में भी लिखें (ये शीट सब देख सकते हैं)</label> <a id="sheetLink" target="_blank" rel="noopener">शीट देखें</a> <span id="sheetMsg"></span></p>
 
   <div class="center">
     <button id="langbtn" class="link" type="button">भाषा बदलें</button>

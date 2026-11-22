@@ -85,6 +85,14 @@ describe("balance / todayCredit", () => {
 });
 
 describe("applyIntent add", () => {
+  it("copies the note onto the added entry", () => {
+    const intent: Intent = {
+      kind: "add",
+      entries: [{ name: "Sita", nameKey: "sita", amount: 50, direction: "credit", dayOffset: 0, note: "cheeni" }],
+    };
+    const r = applyIntent(seed(), intent, ctx());
+    expect(r.ops[0]).toMatchObject({ op: "add", entry: { nameKey: "sita", amount: 50, note: "cheeni" } });
+  });
   const intent: Intent = {
     kind: "add",
     entries: [

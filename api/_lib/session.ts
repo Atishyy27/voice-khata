@@ -4,6 +4,7 @@ import { applyIntent, customers } from "./ledger";
 import { extractAmounts } from "./numbers";
 import { parseUtterance } from "./parse";
 import { greeting, say } from "./replies";
+import { appendToSheet, rowsFor, sheetUrl } from "./sheet";
 import { SttStream } from "./stt";
 import { TtsSocket } from "./tts";
 import type { Entry, Intent, SessionState } from "./types";
@@ -14,6 +15,7 @@ const MAX_HOLD_MS = 20_000;
 const MAX_TURNS = 150;
 
 const istToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
+const istTime = () => new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date());
 
 // The first spoken turn must say it is an AI: the greeting's sentences up to the one that says so.
 export function disclosure(lang: string): string {
@@ -47,7 +49,8 @@ function validEntries(raw: unknown): Entry[] {
         e && typeof e.id === "string" && typeof e.name === "string" && typeof e.nameKey === "string" &&
         Number.isInteger(e.amount) && e.amount > 0 && e.amount <= 10_000_000 &&
         (e.direction === "credit" || e.direction === "payment") &&
-        /^\d{4}-\d{2}-\d{2}$/.test(e.date) && typeof e.at === "string",
+        /^\d{4}-\d{2}-\d{2}$/.test(e.date) && typeof e.at === "string" &&
+        (e.note === undefined || (typeof e.note === "string" && e.note.length <= 120)),
     )
     .slice(0, 5000) as Entry[];
 }
@@ -70,6 +73,8 @@ export class Session {
   private sttLang: string | undefined;
   private holdTimer: NodeJS.Timeout | undefined;
   private closed = false;
+  private sheetOn = false;
+  private sid = randomUUID().slice(0, 8);
 
   constructor(private ws: WebSocket) {
     this.key = process.env.GNANI_API_KEY ?? "";
@@ -100,6 +105,10 @@ export class Session {
       return;
     }
     if (m.t === "hello") return this.hello(m);
+    if (m.t === "sheet") {
+      this.sheetOn = m.on === true;
+      return;
+    }
     if (!this.stt) return;
     if (m.t === "press") return this.press();
     if (m.t === "release") return this.release();
@@ -109,11 +118,13 @@ export class Session {
   private async hello(m: any) {
     this.lang = LANGS.includes(m.lang) ? m.lang : "hi-IN";
     this.greeted = m.greeted === true;
+    this.sheetOn = m.sheet === true;
     this.state = { entries: validEntries(m.entries), lastIds: [] };
     this.stt?.close();
     this.stt = this.makeStt();
     await Promise.all([this.stt.open(), this.tts.warm()]);
     this.send({ t: "ready" });
+    void sheetUrl().then((url) => url && this.send({ t: "sheet_url", url }));
   }
 
   private makeStt() {
@@ -202,9 +213,11 @@ export class Session {
     const intent = crossCheck(parsed.intent, text);
     const parseMs = Date.now() - parseStart;
 
+    const before = this.state.entries;
     const result = applyIntent(this.state, intent, { today: istToday(), now: new Date().toISOString(), newId: () => randomUUID() });
     this.state = result.state;
     if (result.ops.length) this.send({ t: "ops", ops: result.ops });
+    if (this.sheetOn && result.ops.length) void appendToSheet(rowsFor(before, result.ops, this.sid, istTime(), Date.now().toString(36))).then((ok) => this.send({ t: "sheet_saved", ok }));
 
     console.log(JSON.stringify({ ev: "turn", kind: intent.kind, reply: result.reply.key, sttMs, parseMs, model: parsed.model }));
     await this.reply(turn, say(result.reply, this.lang), { sttMs, parseMs });

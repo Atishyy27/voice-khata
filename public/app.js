@@ -6,6 +6,7 @@ const LANGS = [
   ["ml-IN", "മലയാളം"], ["mr-IN", "मराठी"], ["bn-IN", "বাংলা"], ["gu-IN", "ગુજરાતી"], ["pa-IN", "ਪੰਜਾਬੀ"],
 ];
 const LANG_KEY = "vk-lang";
+const SHEET_KEY = "vk-sheet";
 const greetedKey = () => "vk-greeted-" + lang; // per language: the AI disclosure is owed again in a new language
 const TAIL_MS = 150; // keep sending briefly after release so the last syllable is not cut
 const $ = (id) => document.getElementById(id);
@@ -14,6 +15,8 @@ const money = (n) => (n < 0 ? "-" : "") + "₹" + rupee.format(Math.abs(n));
 
 let lang = localStorage.getItem(LANG_KEY);
 if (!LANGS.some(([c]) => c === lang)) lang = null;
+let sheetOn = localStorage.getItem(SHEET_KEY) === "1";
+let sheetMsgTimer = 0;
 
 let ws = null;
 let ready = false;
@@ -62,7 +65,7 @@ function connect() {
     readyTimer = setTimeout(
       () => setStatus("सर्वर से जवाब नहीं आया। नेटवर्क जाँचें, फिर पेज दोबारा खोलें।", "err"), 8000);
     const entries = await allEntries();
-    if (sock === ws && sock.readyState === WebSocket.OPEN) sock.send(JSON.stringify({ t: "hello", lang, entries, greeted: sessionStorage.getItem(greetedKey()) === "1" }));
+    if (sock === ws && sock.readyState === WebSocket.OPEN) sock.send(JSON.stringify({ t: "hello", lang, entries, greeted: sessionStorage.getItem(greetedKey()) === "1", sheet: sheetOn }));
   };
   sock.onmessage = (ev) => { if (sock === ws) onMessage(ev); };
   sock.onclose = () => {
@@ -121,6 +124,15 @@ function onMessage(ev) {
         clearTimeout(idleTimer);
         idleTimer = setTimeout(() => { if (!talking) setIdle(); }, wait);
       }
+      break;
+    case "sheet_url":
+      $("sheetLink").href = m.url;
+      $("sheetBox").hidden = false;
+      break;
+    case "sheet_saved":
+      clearTimeout(sheetMsgTimer);
+      $("sheetMsg").textContent = m.ok ? "शीट में लिखा" : "शीट में नहीं लिख पाए";
+      sheetMsgTimer = setTimeout(() => { $("sheetMsg").textContent = ""; }, 3000);
       break;
     case "error":
       clearTimeout(idleTimer);
@@ -237,6 +249,7 @@ async function render() {
         el("span", credit ? "cr" : "pm", money(e.amount)),
         el("span", credit ? "cr" : "pm", credit ? "उधार" : "जमा"),
       );
+      if (e.note) d.append(el("span", "note", e.note));
       detail.append(d);
     }
     row.onclick = () => {
@@ -298,6 +311,13 @@ $("reset").onclick = async () => {
   await render();
   retryMs = 500;
   connect();
+};
+
+$("sheetOn").checked = sheetOn;
+$("sheetOn").onchange = () => {
+  sheetOn = $("sheetOn").checked;
+  localStorage.setItem(SHEET_KEY, sheetOn ? "1" : "0");
+  send({ t: "sheet", on: sheetOn });
 };
 
 setStatus("...");

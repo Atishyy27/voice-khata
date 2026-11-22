@@ -8,6 +8,7 @@ export interface Entry {
   direction: Direction;
   date: string; // YYYY-MM-DD
   at: string; // ISO
+  note?: string;
 }
 
 export interface ParsedEntry {
@@ -16,6 +17,7 @@ export interface ParsedEntry {
   amount: number;
   direction: Direction;
   dayOffset: number; // 0 today, -1 kal (yesterday), -2 parso
+  note?: string;
 }
 
 export type IntentKind = "add" | "correct" | "query_total" | "query_today" | "clarify_answer" | "other";

@@ -118,6 +118,7 @@ function runAdd(state: SessionState, intent: Intent, ctx: Ctx, forced?: Customer
       direction: p.direction,
       date: dateFromOffset(ctx.today, p.dayOffset),
       at: ctx.now,
+      ...(p.note ? { note: p.note } : {}),
     });
   }
   const entries = [...state.entries, ...made];
