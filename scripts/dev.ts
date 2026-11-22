@@ -4,6 +4,7 @@ import http from "node:http";
 import { extname, join, normalize } from "node:path";
 import { WebSocketServer } from "ws";
 import { Session } from "../api/_lib/session";
+import adminHandler from "../api/admin";
 
 for (const line of readFileSync(".env.local", "utf8").split(/\r?\n/)) {
   const m = line.match(/^([A-Z_]+)=(.*)$/);
@@ -13,6 +14,7 @@ for (const line of readFileSync(".env.local", "utf8").split(/\r?\n/)) {
 const TYPES: Record<string, string> = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css" };
 const root = join(process.cwd(), "public");
 const server = http.createServer((req, res) => {
+  if ((req.url ?? "").split("?")[0] === "/api/admin") return adminHandler(req, res);
   const path = normalize(decodeURIComponent((req.url ?? "/").split("?")[0])).replace(/^([\\/]\.\.)+/, "");
   const file = join(root, path === "/" || path === "\\" ? "index.html" : path);
   if (!file.startsWith(root) || !existsSync(file)) {

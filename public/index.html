@@ -4,73 +4,58 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
+<link rel="icon" href="data:,">
 <title>Voice Khata</title>
-<style>
-  * { box-sizing: border-box; }
-  #heard.live { opacity: 0.6; font-style: italic; }
-  html, body { margin: 0; background: #fff; color: #111; font: 18px/1.4 system-ui, "Noto Sans Devanagari", "Noto Sans", sans-serif; }
-  main { max-width: 480px; margin: 0 auto; padding: 12px 14px 32px; }
-  h1 { margin: 4px 0 0; font-size: 26px; }
-  .sub { margin: 0; color: #444; font-size: 15px; }
-  #status { margin: 12px 0 8px; padding: 10px 12px; border-radius: 10px; background: #eee; font-weight: 700; min-height: 46px; }
-  #status.listen { background: #ffd9d9; color: #8a0000; }
-  #status.think { background: #fff0b8; color: #5a4400; }
-  #status.speak { background: #d6f0d6; color: #0b4a0b; }
-  #status.warn, #status.err { background: #ffe0b8; color: #6a2f00; }
-  .box { margin: 6px 0; padding: 8px 12px; border: 2px solid #ccc; border-radius: 10px; min-height: 52px; }
-  .box small { display: block; color: #555; font-size: 13px; }
-  .box span { font-size: 19px; word-break: break-word; }
-  #badge { display: inline-block; margin: 8px 0; padding: 4px 12px; border-radius: 999px; background: #111; color: #fff; font-size: 16px; font-variant-numeric: tabular-nums; }
-  .center { text-align: center; }
-  #talk { width: 168px; height: 168px; border-radius: 50%; border: 0; margin: 10px 0 14px; background: #0a58d6; color: #fff; font-weight: 700; font-size: 22px; line-height: 1.2; font-family: inherit;
-    touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 6px 0 #063a8f; }
-  #talk.on { background: #d40000; box-shadow: 0 2px 0 #7a0000; transform: translateY(4px); }
-  #ledger { margin: 8px 0; padding: 0; list-style: none; }
-  #ledger > li { border: 2px solid #ccc; border-radius: 10px; margin: 8px 0; overflow: hidden; }
-  .row { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 56px; padding: 8px 12px; background: #fff; border: 0; font: inherit; color: inherit; text-align: left; }
-  .row b { font-size: 20px; font-variant-numeric: tabular-nums; }
-  .entries { padding: 0 12px 8px; background: #f6f6f6; }
-  .entries div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid #ddd; font-size: 16px; font-variant-numeric: tabular-nums; }
-  .entries .note { flex-basis: 100%; color:#666; font-size:14px; }
-  .cr { color: #9a0000; }
-  .pm { color: #0b5a0b; }
-  .link { background: none; border: 0; padding: 10px 4px; font-size: 15px; font-family: inherit; color: #0a3fa0; text-decoration: underline; cursor: pointer; min-height: 44px; }
-  #picker { position: fixed; inset: 0; background: #fff; z-index: 10; overflow: auto; padding: 16px 14px; }
-  #picker h2 { margin: 4px 0 12px; font-size: 22px; text-align: center; }
-  #langs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 480px; margin: 0 auto; }
-  #langs button { min-height: 72px; font-weight: 700; font-size: 22px; font-family: inherit; border: 2px solid #0a58d6; border-radius: 12px; background: #fff; color: #0a3fa0; }
-  #langs button:active { background: #dbe8ff; }
-  .sheet { font-size: 15px; color: #444; } .sheet a { margin-left: 8px; } #sheetMsg { margin-left: 8px; color: #2a7; }
-  [hidden] { display: none !important; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <main>
-  <h1>Voice Khata</h1>
-  <p class="sub">AI सहायक</p>
+  <header class="top">
+    <h1>Voice Khata</h1>
+    <span class="pill">AI सहायक</span>
+    <button id="langbtn" class="chip" type="button">भाषा बदलें</button>
+  </header>
 
-  <div id="status" role="status" aria-live="polite">...</div>
+  <div class="page">
+    <section id="summary">
+      <div class="tile"><span>कुल बाकी</span><b id="sumDue">₹0</b></div>
+      <div class="tile"><span>आज उधार</span><b id="sumToday">₹0</b></div>
+      <div class="tile"><span>ग्राहक</span><b id="sumCount">0</b></div>
+    </section>
 
-  <div class="box"><small>सुना</small><span id="heard">-</span></div>
-  <div class="box"><small>जवाब</small><span id="reply">-</span></div>
+    <div id="status" role="status" aria-live="polite">...</div>
 
-  <div class="center">
-    <div id="badge" title="पहली आवाज़ तक का समय">-- s</div>
-    <div><button id="talk" type="button">दबाकर बोलें</button></div>
-  </div>
+    <section class="card">
+      <div class="label">सुना</div>
+      <div id="heard" class="caption">-</div>
+    </section>
 
-  <ul id="ledger"></ul>
-  <p class="sheet" id="sheetBox" hidden><label><input type="checkbox" id="sheetOn"> डेमो शीट में भी लिखें (ये शीट सब देख सकते हैं)</label> <a id="sheetLink" target="_blank" rel="noopener">शीट देखें</a> <span id="sheetMsg"></span></p>
+    <section class="card">
+      <span id="badge"></span>
+      <div class="label">जवाब</div>
+      <div id="reply">-</div>
+    </section>
 
-  <div class="center">
-    <button id="langbtn" class="link" type="button">भाषा बदलें</button>
-    <button id="reset" class="link" type="button">डेमो डेटा रीसेट</button>
+    <h2 class="section">खाता</h2>
+    <ul id="ledger"></ul>
+
+    <footer class="foot">
+      <p class="sheet" id="sheetBox" hidden><label><input type="checkbox" id="sheetOn"> डेमो शीट में भी लिखें (ये शीट सब देख सकते हैं)</label> <a id="sheetLink" target="_blank" rel="noopener">शीट देखें</a> <span id="sheetMsg"></span></p>
+      <button id="reset" class="link" type="button">डेमो डेटा रीसेट</button>
+    </footer>
   </div>
 </main>
 
+<div class="dock">
+  <div id="timer">0:00</div>
+  <button id="talk" type="button">दबाकर बोलें</button>
+  <div id="hint">दबाकर रखें, बोलें, छोड़ें</div>
+</div>
+
+<div id="toast" role="status"></div>
+
 <div id="picker" hidden>
-  <h2>अपनी भाषा चुनें<br><span style="font-size:16px;font-weight:400">Choose your language</span></h2>
+  <h2>अपनी भाषा चुनें<br><span>Choose your language</span></h2>
   <div id="langs"></div>
 </div>
 

@@ -80,7 +80,7 @@ export async function parseUtterance(
         }),
         signal: AbortSignal.timeout(4000),
       });
-      if (!res.ok) throw new Error(`groq ${res.status} ${(await res.text()).slice(0, 160)}`);
+      if (!res.ok) throw new Error(`groq ${res.status}`); // status only: a provider body can echo the user's words
       const body = (await res.json()) as { choices: { message: { content: string } }[] };
       const intent = toIntent(JSON.parse(body.choices[0].message.content));
       return { intent, ms: Date.now() - started, model };
@@ -104,7 +104,7 @@ async function gemini(model: string, system: string, text: string): Promise<stri
     }),
     signal: AbortSignal.timeout(4000),
   });
-  if (!res.ok) throw new Error(`gemini ${res.status} ${(await res.text()).slice(0, 160)}`);
+  if (!res.ok) throw new Error(`gemini ${res.status}`);
   const body = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const out = body.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
   if (!out) throw new Error("gemini returned no text");

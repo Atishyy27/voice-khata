@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voice khata admin</title>
+<style>
+  body { font: 14px/1.4 system-ui, sans-serif; margin: 16px; background: #f6f6f4; color: #1d1d1b; }
+  h1 { font-size: 18px; margin: 0 0 12px; }
+  h2 { font-size: 14px; margin: 16px 0 6px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .col h2 { margin-top: 0; }
+  .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .tile { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 8px; }
+  .tile b { display: block; font-size: 20px; }
+  .tile span { color: #666; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  td, th { border-bottom: 1px solid #eee; padding: 4px 6px; text-align: left; vertical-align: top; }
+  td.err { color: #b00020; word-break: break-word; }
+  #msg { color: #b00020; margin-top: 12px; }
+  .muted { color: #666; }
+</style>
+</head>
+<body>
+<h1>Voice khata admin</h1>
+<div id="msg"></div>
+<div class="cols" id="cols" hidden>
+  <div class="col" id="c24"></div>
+  <div class="col" id="c7"></div>
+</div>
+<script>
+  function el(tag, props, children) {
+    const n = document.createElement(tag);
+    if (props) for (const k in props) n.setAttribute(k, props[k]);
+    for (const c of children || []) n.append(c);
+    return n;
+  }
+  function tile(label, value) {
+    return el("div", { class: "tile" }, [el("b", null, [value == null ? "-" : String(value)]), el("span", null, [label])]);
+  }
+  function ms(p) {
+    if (!p || p.p50 == null) return "-";
+    return p.p50 + " / " + p.p90 + " ms";
+  }
+  function table(head, rows, render) {
+    const tb = el("table", null, [el("tr", null, head.map((h) => el("th", null, [h])))]);
+    for (const r of rows) tb.append(el("tr", null, render(r)));
+    return tb;
+  }
+  function section(title, node) {
+    return [el("h2", null, [title]), node];
+  }
+  function render(w, label) {
+    const tiles = el("div", { class: "tiles" }, [
+      tile("sessions", w.sessions),
+      tile("turns", w.turns),
+      tile("errors", w.errors),
+      tile("barge-ins", w.bargeIns),
+      tile("first audio p50 / p90", ms(w.firstAudioMs)),
+      tile("stt p50 / p90", ms(w.sttMs)),
+      tile("parse p50 / p90", ms(w.parseMs)),
+      tile("tts p50 / p90", ms(w.ttsMs)),
+    ]);
+    const langs = table(["language", "turns"], w.languages, (r) => [el("td", null, [r.lang]), el("td", null, [String(r.turns)])]);
+    const clients = table(["client event", "count"], w.clientEvents, (r) => [el("td", null, [r.ev]), el("td", null, [String(r.count)])]);
+    const errs = table(["at", "stage", "error"], w.lastErrors, (r) => [
+      el("td", null, [r.at]),
+      el("td", null, [r.stage || "-"]),
+      el("td", { class: "err" }, [r.error || "-"]),
+    ]);
+    return [
+      el("h2", null, [label]),
+      tiles,
+      ...section("Languages", langs),
+      ...section("Client events", clients),
+      ...section("Last errors", errs),
+    ];
+  }
+  async function load() {
+    const token = decodeURIComponent(location.hash.slice(1));
+    const msg = document.getElementById("msg");
+    if (!token) {
+      msg.textContent = "add #token=... to the URL";
+      return;
+    }
+    let res;
+    try {
+      res = await fetch("/api/admin?token=" + encodeURIComponent(token), { cache: "no-store" });
+    } catch {
+      msg.textContent = "network error";
+      return;
+    }
+    if (res.status === 401) {
+      msg.textContent = "wrong token";
+      return;
+    }
+    if (!res.ok) {
+      msg.textContent = "server error (" + res.status + ")";
+      return;
+    }
+    const data = await res.json();
+    document.getElementById("c24").append(...render(data["24h"], "Last 24 hours"));
+    document.getElementById("c7").append(...render(data["7d"], "Last 7 days"));
+    document.getElementById("cols").hidden = false;
+    msg.textContent = "updated " + new Date(data.generatedAt).toLocaleString();
+    msg.className = "muted";
+  }
+  load();
+</script>
+</body>
+</html>

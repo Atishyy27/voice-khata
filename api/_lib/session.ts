@@ -7,12 +7,18 @@ import { greeting, say } from "./replies";
 import { appendToSheet, rowsFor, sheetUrl } from "./sheet";
 import { SttStream } from "./stt";
 import { TtsSocket } from "./tts";
+import { track } from "./telemetry";
 import type { Entry, Intent, SessionState } from "./types";
 
 const LANGS = ["hi-IN", "en-IN", "kn-IN", "ta-IN", "te-IN", "ml-IN", "mr-IN", "bn-IN", "gu-IN", "pa-IN"];
 const FRAME_BYTES = 1024;
 const MAX_HOLD_MS = 20_000;
 const MAX_TURNS = 150;
+const MAX_CLIENT_LOGS = 200;
+const CLIENT_EVENTS = new Set([
+  "page_load", "lang_pick", "picker_shown", "ws_open", "ws_close", "ready", "mic_ok", "mic_error", "press", "release",
+  "barge_in", "first_audio", "reconnect", "js_error", "sheet_toggle",
+]);
 
 const istToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
 const istTime = () => new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date());
@@ -75,25 +81,31 @@ export class Session {
   private closed = false;
   private sheetOn = false;
   private sid = randomUUID().slice(0, 8);
+  private connectedAt = Date.now();
+  private speaking = false;
+  private clientLogs = 0;
 
   constructor(private ws: WebSocket) {
     this.key = process.env.GNANI_API_KEY ?? "";
     this.tts = new TtsSocket(this.key);
+    track("connect", { session: this.sid });
     ws.on("message", (data, isBinary) => {
       if (isBinary) this.onAudio(data as Buffer);
-      else this.onText(data.toString()).catch((e) => this.fail(e));
+      else this.onText(data.toString()).catch((e) => this.fail(e, "message"));
     });
     ws.on("close", () => this.dispose());
     ws.on("error", () => this.dispose());
-    if (!this.key || !process.env.GROQ_API_KEY) this.fail(new Error("server keys missing"));
+    if (!this.key || !process.env.GROQ_API_KEY) this.fail(new Error("server keys missing"), "config");
   }
 
   private send(obj: object) {
     if (!this.closed && this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify(obj));
   }
 
-  private fail(e: unknown) {
-    console.error(JSON.stringify({ ev: "error", message: e instanceof Error ? e.message : String(e) }));
+  private fail(e: unknown, stage?: string) {
+    const message = e instanceof Error ? e.message : String(e);
+    console.error(JSON.stringify({ ev: "error", message }));
+    track("error", { session: this.sid, error: message, stage });
     this.send({ t: "error", message: "सर्वर में दिक्कत आई, फिर से कोशिश करें।" });
   }
 
@@ -107,6 +119,12 @@ export class Session {
     if (m.t === "hello") return this.hello(m);
     if (m.t === "sheet") {
       this.sheetOn = m.on === true;
+      return;
+    }
+    if (m.t === "log") {
+      if (++this.clientLogs <= MAX_CLIENT_LOGS && CLIENT_EVENTS.has(m.ev)) {
+        track("client_" + m.ev, { ...m, session: this.sid, lang: this.lang });
+      }
       return;
     }
     if (!this.stt) return;
@@ -124,6 +142,7 @@ export class Session {
     this.stt = this.makeStt();
     await Promise.all([this.stt.open(), this.tts.warm()]);
     this.send({ t: "ready" });
+    track("hello", { session: this.sid, lang: this.lang, entries: this.state.entries.length, sheet: this.sheetOn });
     void sheetUrl().then((url) => url && this.send({ t: "sheet_url", url }));
   }
 
@@ -158,6 +177,10 @@ export class Session {
     if (this.turns >= MAX_TURNS) {
       this.send({ t: "error", message: "इस सत्र की सीमा पूरी हुई। पेज दोबारा खोलें।" });
       return;
+    }
+    if (this.speaking) {
+      this.speaking = false;
+      track("barge_in", { session: this.sid, lang: this.lang });
     }
     this.turn++;
     this.tts.cancel();
@@ -220,6 +243,7 @@ export class Session {
     if (this.sheetOn && result.ops.length) void appendToSheet(rowsFor(before, result.ops, this.sid, istTime(), Date.now().toString(36))).then((ok) => this.send({ t: "sheet_saved", ok }));
 
     console.log(JSON.stringify({ ev: "turn", kind: intent.kind, reply: result.reply.key, sttMs, parseMs, model: parsed.model }));
+    track("turn", { session: this.sid, lang: this.lang, kind: intent.kind, reply: result.reply.key, stt_ms: sttMs, parse_ms: parseMs, model: parsed.model, ok: true });
     await this.reply(turn, say(result.reply, this.lang), { sttMs, parseMs });
   }
 
@@ -244,6 +268,7 @@ export class Session {
     this.send({ t: "say", turn, text });
     const ttsStart = Date.now();
     let first = 0;
+    this.speaking = true;
     try {
       await this.tts.speak(text, this.lang, (pcm) => {
         if (turn !== this.turn || this.closed) return;
@@ -253,19 +278,18 @@ export class Session {
     } catch (e) {
       // A barge-in already closed this socket and opened a fresh one; only a failure of the live turn resets it.
       if (turn === this.turn) {
-        this.fail(e);
+        this.fail(e, "tts");
         this.tts.cancel();
       }
       return false;
+    } finally {
+      if (turn === this.turn) this.speaking = false;
     }
     if (turn !== this.turn || this.closed) return false;
-    this.send({
-      t: "said",
-      turn,
-      firstAudioMs: first ? first - this.releasedAt : null,
-      ttsMs: first ? first - ttsStart : null,
-      ...timing,
-    });
+    const firstAudioMs = first ? first - this.releasedAt : null;
+    const ttsMs = first ? first - ttsStart : null;
+    this.send({ t: "said", turn, firstAudioMs, ttsMs, ...timing });
+    track("said", { session: this.sid, lang: this.lang, first_audio_ms: firstAudioMs, tts_ms: ttsMs });
     return true;
   }
 
@@ -273,6 +297,7 @@ export class Session {
     if (this.closed) return;
     this.closed = true;
     clearTimeout(this.holdTimer);
+    track("disconnect", { session: this.sid, turns: this.turns, durationMs: Date.now() - this.connectedAt });
     this.stt?.close();
     this.tts.close();
   }
