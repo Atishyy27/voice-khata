@@ -20,7 +20,7 @@ const MAX_CLIENT_LOGS = 200;
 const MAX_TYPED = 300;
 const CLIENT_EVENTS = new Set([
   "page_load", "lang_pick", "picker_shown", "ws_open", "ws_close", "ready", "mic_ok", "mic_error", "press", "release",
-  "barge_in", "first_audio", "reconnect", "js_error", "sheet_toggle",
+  "barge_in", "first_audio", "reconnect", "js_error", "sheet_toggle", "turn_timeout",
 ]);
 
 const istToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());

@@ -67,6 +67,9 @@ let ready = false;
 // silence means the message was lost (seen once on 22 Nov); the page reconnects and resends it once.
 let pendingText = "";
 let pendingTimer = 0;
+// A spoken turn the server never answers (seen on a stalled laptop link, 22 Nov): the server replies within about
+// 4.2 s even when it hears nothing, so 8 s of silence after release means the link is gone.
+let turnTimer = 0;
 let held = false;
 let talking = false;
 let sending = false;
@@ -348,6 +351,7 @@ function onMessage(ev) {
       box().classList.add("live");
       break;
     case "heard": {
+      clearTimeout(turnTimer);
       pendingText = "";
       clearTimeout(pendingTimer);
       const t = cur();
@@ -372,6 +376,7 @@ function onMessage(ev) {
       break;
     }
     case "say": {
+      clearTimeout(turnTimer);
       const t = cur();
       talk.classList.remove("busy");
       accepting = true;
@@ -402,6 +407,7 @@ function onMessage(ev) {
       toast(m.ok ? "शीट में लिखा" : "शीट में नहीं लिख पाए");
       break;
     case "error": {
+      clearTimeout(turnTimer);
       const msg = m.message || "कुछ गड़बड़ हुई";
       talk.classList.remove("busy");
       clearTimeout(idleTimer);
@@ -477,6 +483,7 @@ async function press() {
   }
   if (!held) return;
   if (!ready || !ws || ws.readyState !== WebSocket.OPEN) { held = false; return; }
+  clearTimeout(turnTimer);
   newTurn(false);
   send({ t: "press" });
   log("press");
@@ -501,7 +508,19 @@ function release() {
     tailTimer = 0;
     sending = false;
     send({ t: "release" });
+    watchTurn();
   }, TAIL_MS);
+}
+
+function watchTurn() {
+  clearTimeout(turnTimer);
+  turnTimer = setTimeout(() => {
+    talk.classList.remove("busy");
+    setStatus("नेटवर्क धीमा है, फिर से बोलें", "warn");
+    toast("नेटवर्क धीमा है, फिर से बोलें");
+    log("turn_timeout");
+    connect();
+  }, 8000);
 }
 
 // ---- Typed input ----
