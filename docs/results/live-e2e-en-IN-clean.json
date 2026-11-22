@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-21T23:46:57.456Z",
+  "at": "2026-11-22T08:25:35.107Z",
   "url": "wss://voice-khata-gray.vercel.app/api/ws",
   "results": [
     {
@@ -10,11 +10,12 @@
         "add Pinky 500 credit 2026-11-22"
       ],
       "reply": "Added ₹500 udhaar for Pinky. Total due ₹620.",
-      "clientFirstAudioMs": 771,
-      "serverFirstAudioMs": 691,
-      "sttMs": 261,
-      "parseMs": 271,
-      "ttsMs": 158
+      "partials": 2,
+      "clientFirstAudioMs": 622,
+      "serverFirstAudioMs": 553,
+      "sttMs": 180,
+      "parseMs": 267,
+      "ttsMs": 104
     },
     {
       "file": "en-2.wav",
@@ -24,11 +25,12 @@
         "add Anil 250 payment 2026-11-22"
       ],
       "reply": "Received ₹250 from Anil. Total due ₹150.",
-      "clientFirstAudioMs": 952,
-      "serverFirstAudioMs": 868,
-      "sttMs": 303,
-      "parseMs": 404,
-      "ttsMs": 159
+      "partials": 3,
+      "clientFirstAudioMs": 837,
+      "serverFirstAudioMs": 745,
+      "sttMs": 241,
+      "parseMs": 407,
+      "ttsMs": 96
     },
     {
       "file": "en-3.wav",
@@ -38,11 +40,12 @@
         "update {\"amount\":300}"
       ],
       "reply": "Fixed. Anil, ₹300 received. Total due ₹100.",
-      "clientFirstAudioMs": 848,
-      "serverFirstAudioMs": 750,
-      "sttMs": 135,
-      "parseMs": 464,
-      "ttsMs": 150
+      "partials": 2,
+      "clientFirstAudioMs": 659,
+      "serverFirstAudioMs": 583,
+      "sttMs": 148,
+      "parseMs": 305,
+      "ttsMs": 129
     },
     {
       "file": "en-4.wav",
@@ -50,11 +53,12 @@
       "heard": "What is Sita's total?",
       "ops": [],
       "reply": "Sita owes ₹300.",
-      "clientFirstAudioMs": 1055,
-      "serverFirstAudioMs": 949,
-      "sttMs": 215,
-      "parseMs": 526,
-      "ttsMs": 208
+      "partials": 3,
+      "clientFirstAudioMs": 870,
+      "serverFirstAudioMs": 813,
+      "sttMs": 205,
+      "parseMs": 505,
+      "ttsMs": 102
     },
     {
       "file": "en-5.wav",
@@ -62,11 +66,12 @@
       "heard": "How much credit went out today?",
       "ops": [],
       "reply": "Today ₹2,470 udhaar given, 7 entries.",
-      "clientFirstAudioMs": 767,
-      "serverFirstAudioMs": 710,
-      "sttMs": 198,
-      "parseMs": 346,
-      "ttsMs": 166
+      "partials": 2,
+      "clientFirstAudioMs": 787,
+      "serverFirstAudioMs": 701,
+      "sttMs": 188,
+      "parseMs": 407,
+      "ttsMs": 106
     }
   ]
 }
